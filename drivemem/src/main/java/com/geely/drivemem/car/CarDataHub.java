@@ -97,11 +97,11 @@ public final class CarDataHub {
         new ParkDuration(0x08, "3h",    "3 h"),
         new ParkDuration(0x0A, "4h",    "4 h"),
         new ParkDuration(0x0C, "5h",    "5 h"),
-        new ParkDuration(0x13, "unlimited", "Ilimitado"),
+        new ParkDuration(0x13, "unlimited", "Unlimited"),
     };
 
     /** Decodes parking mode duration from the low byte to a human-readable
-     * label (e.g., "1 h", "Ilimitado"). */
+     * label (e.g., "1 h", "Unlimited"). */
     public static String parkLabel(int raw) {
         int code = raw & 0xFF;
         for (ParkDuration d : PARK_DURATIONS) if (d.code == code) return d.label;
@@ -109,11 +109,13 @@ public final class CarDataHub {
     }
 
     /** Converts a parking mode label back to its low-byte code. Default
-     * (null or unrecognized) is 0x13, "Ilimitado". */
+     * (null or unrecognized) is 0x13, "Unlimited". The old Portuguese label
+     * remains accepted so retained Home Assistant commands keep working. */
     public static int parkCode(String label) {
         if (label != null) {
             String trimmed = label.trim();
             for (ParkDuration d : PARK_DURATIONS) if (d.label.equals(trimmed)) return d.code;
+            if ("Ilimitado".equalsIgnoreCase(trimmed)) return 0x13;
         }
         return 0x13;
     }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Traducao para portugues do Brasil. E esta que o carro mostra: a locale do head
-  unit e pt-BR, entao values-pt vence o values/ em ingles.
+  Traducao para portugues do Brasil, mantida como fonte para uso futuro. A build
+  atual inclui apenas os recursos em ingles, independentemente da locale do carro.
 
   Se faltar uma chave aqui, o Android cai no ingles do values/ — nao quebra, so
   aparece em ingles. E o modo certo de falhar.

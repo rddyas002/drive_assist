@@ -29,8 +29,8 @@ public class HvacSet extends Activity {
 
         CarActor.get(this).runOnCarThread(() -> {
             CarAccess car = CarActor.get(this).rawAccess();
-            if (!car.isReady() && !car.connect(getApplicationContext())) { post("sem car"); return; }
-            StringBuilder sb = new StringBuilder("Direcao do ar (leia o modo atual da tela do carro):\n\n");
+            if (!car.isReady() && !car.connect(getApplicationContext())) { post("vehicle unavailable"); return; }
+            StringBuilder sb = new StringBuilder("Air direction (read the current mode from the vehicle screen):\n\n");
             probe(car, sb, "HVAC_FAN_DIRECTION", DIR);
             probe(car, sb, "ZONED_FAN_DIRECTION", ZONED_DIR);
             probe(car, sb, "HVAC_FAN_DIRECTION_AUTO", DIR_AUTO);
@@ -45,7 +45,7 @@ public class HvacSet extends Activity {
             String v = car.readAny(prop, a, 'i');
             if (v != null) { sb.append("[a").append(a).append("=").append(v).append("] "); any = true; }
         }
-        if (!any) sb.append("(sem leitura)");
+        if (!any) sb.append("(no reading)");
         sb.append("\n\n");
     }
 

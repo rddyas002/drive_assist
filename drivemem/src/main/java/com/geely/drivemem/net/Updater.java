@@ -139,12 +139,12 @@ public class Updater {
      * also check isSessionActive(), isChargeGraceScheduled(), and activeRowId(). */
     public static String installBlockedReason(boolean force) {
         if (force) return null;
-        if (!com.geely.drivemem.state.CarState.isParked()) return "bloqueado: veículo em movimento";
+        if (!com.geely.drivemem.state.CarState.isParked()) return "blocked: vehicle is moving";
         if (com.geely.drivemem.state.ChargeSession.isCharging()
                 || com.geely.drivemem.state.ChargeSession.isSessionActive()
                 || com.geely.drivemem.state.ChargeSession.isChargeGraceScheduled()
                 || com.geely.drivemem.state.ChargeSession.activeRowId() > 0) {
-            return "bloqueado: veículo carregando";
+            return "blocked: vehicle is charging";
         }
         return null;
     }
@@ -424,7 +424,7 @@ public class Updater {
                     u = Prefs.getUpdateUrl(ctx, DEFAULT_URL);
                     if (u.trim().isEmpty()) u = DEFAULT_URL;
                 }
-                if (!u.startsWith("https://")) { p.step("erro: URL precisa ser https"); return; }
+                if (!u.startsWith("https://")) { p.step("error: URL must use HTTPS"); return; }
 
                 boolean force = url != null && url.toLowerCase(java.util.Locale.US).contains("force");
                 String blocked = installBlockedReason(force);
@@ -440,7 +440,7 @@ public class Updater {
                 // redelivered on every reconnect, so this check avoids repeated
                 // downloads/installs of the same APK.
                 if (u.equals(Prefs.getUpdateLastUrl(ctx))) {
-                    p.step("já aplicado"); return;
+                    p.step("already applied"); return;
                 }
 
                 // Delegate to the helper if installed: modehelper runs as uid
@@ -460,7 +460,7 @@ public class Updater {
                     ctx.sendBroadcast(i);
                     return;
                 }
-                p.step("sem helper — tentando root");
+                p.step("helper unavailable — trying root");
 
                 p.step("baixando");
                 File out = new File(ctx.getCacheDir(), "update.apk");
@@ -468,7 +468,7 @@ public class Updater {
                 c.setConnectTimeout(15000); c.setReadTimeout(30000);
                 c.setRequestProperty("User-Agent", "Drive Assist");
                 int code = c.getResponseCode();
-                if (code != 200) { p.step("erro: HTTP " + code); return; }
+                if (code != 200) { p.step("error: HTTP " + code); return; }
                 long total = 0;
                 try (InputStream in = c.getInputStream(); FileOutputStream fo = new FileOutputStream(out)) {
                     byte[] buf = new byte[8192]; int n;
@@ -477,7 +477,7 @@ public class Updater {
                 // validate the PK "magic" (zip/apk) before trying to install
                 byte[] head = new byte[2];
                 try (FileInputStream fi = new FileInputStream(out)) { if (fi.read(head) < 2) head[0] = 0; }
-                if (head[0] != 'P' || head[1] != 'K') { p.step("erro: arquivo nao e apk"); return; }
+                if (head[0] != 'P' || head[1] != 'K') { p.step("error: file is not an APK"); return; }
 
                 // Compare the downloaded APK's hash with the installed one to
                 // verify they are identical. This catches relabeled APKs and
@@ -486,7 +486,7 @@ public class Updater {
                 String got  = sha256(out);
                 if (mine != null && mine.equals(got)) {
                     Prefs.setUpdateLastUrl(ctx, u);
-                    p.step("já instalado (" + got.substring(0, 8) + ")");
+                    p.step("already installed (" + got.substring(0, 8) + ")");
                     return;
                 }
                 Log.i(TAG, "update: installed=" + mine + " downloaded=" + got);
@@ -498,8 +498,8 @@ public class Updater {
                 Log.i(TAG, "update pm install: " + res);
                 boolean ok = res.toLowerCase().contains("success");
                 if (ok) Prefs.setUpdateLastUrl(ctx, u);
-                p.step(ok ? "OK — atualizado" : "erro: " + res.trim());
-            } catch (Throwable t) { Log.w(TAG, "update error: " + t); p.step("erro: " + t); }
+                p.step(ok ? "OK — updated" : "error: " + res.trim());
+            } catch (Throwable t) { Log.w(TAG, "update error: " + t); p.step("error: " + t); }
         }, "updater").start();
     }
 

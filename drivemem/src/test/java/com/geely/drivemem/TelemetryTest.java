@@ -20,7 +20,7 @@ public class TelemetryTest {
         assertEquals("3 h", Telemetry.parkTimerLabel(0x08));
         assertEquals("4 h", Telemetry.parkTimerLabel(0x0A));
         assertEquals("5 h", Telemetry.parkTimerLabel(0x0C));
-        assertEquals("Ilimitado", Telemetry.parkTimerLabel(0x13));
+        assertEquals("Unlimited", Telemetry.parkTimerLabel(0x13));
     }
 
     @Test public void parkTimerLabelUnknownCodeFallsBackToHex() {
@@ -37,6 +37,7 @@ public class TelemetryTest {
     @Test public void parkTimerCodeDefaultsToUnlimited() {
         assertEquals(0x13, Telemetry.parkTimerCode(null));
         assertEquals(0x13, Telemetry.parkTimerCode("nonsense"));
+        assertEquals(0x13, Telemetry.parkTimerCode("Ilimitado"));
     }
 
     @Test public void gearLabelKnownValues() {

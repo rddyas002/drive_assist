@@ -624,7 +624,7 @@ public final class CertImporter {
             SSLSocket sslSocket = null;
             try {
                 if (targetUri == null || targetUri.trim().isEmpty()) {
-                    main.post(() -> cb.onResult(false, "Nenhum endereço de broker informado"));
+                    main.post(() -> cb.onResult(false, "No broker address provided"));
                     return;
                 }
                 // Handle multi-target inputs: split on newlines, commas, or whitespace
@@ -667,7 +667,7 @@ public final class CertImporter {
                 if (isPlainTcp && port == 1883) {
                     final String failUri = chosen;
                     main.post(() -> cb.onResult(false,
-                        "URI '" + failUri + "' é texto plano (porta 1883). O teste TLS requer ssl:// ou porta 8883."));
+                        "URI '" + failUri + "' is plaintext (port 1883). The TLS test requires ssl:// or port 8883."));
                     return;
                 }
 
@@ -718,9 +718,9 @@ public final class CertImporter {
                 String diag = "";
                 String full = t.toString();
                 if (full.contains("certificate_required") || full.contains("CERTIFICATE_REQUIRED")) {
-                    diag = "\n(Broker exige mTLS / certificado de cliente. Verifique mqtt_client.p12)";
+                    diag = "\n(Broker requires mTLS / a client certificate. Check mqtt_client.p12)";
                 } else if (full.contains("CertPathValidatorException") || full.contains("Trust anchor")) {
-                    diag = "\n(Certificado da CA não confiável pelo Android. Verifique mqtt_ca.crt)";
+                    diag = "\n(CA certificate is not trusted by Android. Check mqtt_ca.crt)";
                 }
                 final String errMsg = "TLS handshake failed: " + msg + diag;
                 main.post(() -> cb.onResult(false, errMsg));

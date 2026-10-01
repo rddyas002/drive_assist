@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  UI text, in ENGLISH (the default). The Portuguese translation lives in
-  res/values-pt/strings.xml and the head unit picks it by its locale.
+  UI text, in ENGLISH. Locale-specific source bundles remain available for
+  future use, but the production build packages English resources only.
 
-  The rule: no text that appears on screen may go back to being a literal in the
-  middle of the Java. Displayed language is a resource choice, not a code edit.
+  The rule: no new text that appears on screen may be added as a literal in the
+  middle of Java. Displayed language should come from this resource bundle.
 
   Concatenation becomes a PLACEHOLDER, never a fragment. "Enviando (a cada " + n
   + "s)" cannot be translated: word order moves between languages and a dangling
@@ -14,9 +14,9 @@
   would otherwise collapse. The AC readout depends on exactly three spaces around
   its separators.
 
-  NOT here: MQTT topics, SharedPreferences keys, log messages, theme ids, and the
-  Home Assistant entity names in Telemetry.java (renaming those would rename the
-  user's HA entities and break their automations).
+  NOT here: MQTT topics, SharedPreferences keys, internal log messages, and theme
+  ids. Home Assistant display names are English literals, while their stable keys,
+  topics, and unique IDs remain language-neutral.
 
   This file is the SOURCE. It was once merged from per-file fragments by a
   scratchpad script that no longer exists — edit it directly.

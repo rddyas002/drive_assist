@@ -38,26 +38,25 @@ public class Telemetry {
     //
     // `name` is only ever read by MqttReporter, to fill the "name" field of each
     // Home Assistant MQTT-discovery sensor — it is the friendly name HA shows for
-    // that entity, not app UI text, so it does not belong in res/values/strings.xml
-    // (that mechanism is for screens this app itself renders) and stays in
-    // Portuguese on purpose, matching the rest of this user's HA instance.
+    // that entity, not app UI text. Keep these names in English while the stable
+    // key below continues to define its MQTT topic and unique ID.
     public static final Field[] FIELDS = {
-        new Field(557885165, 'f', 1f, "battery",  "Bateria",     "%",  "battery", 0),  // integer
-        new Field(289407492, 'f', 1f, "odometer", "Odometro",    "km", "distance"),
-        new Field(289407752, 'f', 1f, "range",    "Autonomia",   "km", "distance"),
-        new Field(291504647, 'f', 1f, "speed",    "Velocidade",  "km/h", null),
-        new Field(289408001, 'i', 1f, "gear",     "Marcha",      null, null),
+        new Field(557885165, 'f', 1f, "battery",  "Battery",     "%",  "battery", 0),  // integer
+        new Field(289407492, 'f', 1f, "odometer", "Odometer",    "km", "distance"),
+        new Field(289407752, 'f', 1f, "range",    "Range",       "km", "distance"),
+        new Field(291504647, 'f', 1f, "speed",    "Speed",       "km/h", null),
+        new Field(289408001, 'i', 1f, "gear",     "Gear",        null, null),
         // 'b' = boolean: the RAW value is 2 when it is off; only the adapted one
         // (getBooleanProperty) tells the truth. Reading it as an int published
         // "on".
-        new Field(354419984, 'b', 1f, "ac_on",    "AC ligado",   null, null),
-        new Field(658548345, 'f', 1f, "trip_km",  "Trip total",  "km", "distance"),
+        new Field(354419984, 'b', 1f, "ac_on",    "AC On",       null, null),
+        new Field(658548345, 'f', 1f, "trip_km",  "Trip Total",  "km", "distance"),
         // charging (they only show up when plugged in/charging; skipped if null)
-        new Field(605291008, 'f', 1f, "charge_a", "Corrente de carga", "A", "current"),
+        new Field(605291008, 'f', 1f, "charge_a", "Charging Current", "A", "current"),
         // 'charging' does not come from a Field: it is derived from the charge
         // switch at the end of read(), because the current alone does not tell
         // "stopped" apart from "cable unplugged" — both give a residual reading.
-        new Field(605290752, 'f', 1f, "charge_v", "Tensão de carga",   "V", "voltage"),
+        new Field(605290752, 'f', 1f, "charge_v", "Charging Voltage",   "V", "voltage"),
     };
 
     /** Returns the rounding precision for a field key, or null if not a standard field. */
@@ -266,12 +265,12 @@ public class Telemetry {
     public static long getLastPowerSocAtMsForTesting() { return lastPowerSocAtMs; }
 
     /** Decodes parking mode duration from the low byte to a human-readable
-     * label (e.g., "1 h", "Ilimitado"). Thin wrapper: CarDataHub.PARK_DURATIONS
+     * label (e.g., "1 h", "Unlimited"). Thin wrapper: CarDataHub.PARK_DURATIONS
      * is the single source of truth, shared with the ValueSet that validates
      * park_mode writes, so the two cannot drift apart. */
     public static String parkTimerLabel(int raw) { return CarDataHub.parkLabel(raw); }
 
-    /** Converts a parking mode label to its code (low byte). Default is "Ilimitado". */
+    /** Converts a parking mode label to its code (low byte). Default is "Unlimited". */
     public static int parkTimerCode(String label) { return CarDataHub.parkCode(label); }
 
     /** Converts a gear enum value to a single-letter label (N/R/P/D). */

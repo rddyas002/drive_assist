@@ -92,6 +92,10 @@ android {
         applicationId "com.geely.drivemem"
         minSdkVersion 28
         targetSdkVersion 28
+        // This head unit runs with a pt-BR system locale, but Drive Assist is
+        // distributed in English. Keep only the default English resources so
+        // Android cannot substitute a device-locale translation at runtime.
+        resConfigs "en"
         versionCode vCode
         versionName vName
         buildConfigField "String", "ABRP_API_KEY", "\"${abrpApiKey}\""

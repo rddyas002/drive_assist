@@ -23,7 +23,7 @@ public final class DailyStatsProvider {
 
     private static final SimpleDateFormat DAY_FMT = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private static final SimpleDateFormat SHORT_DAY_FMT = new SimpleDateFormat("d/M", Locale.US);
-    private static final SimpleDateFormat DISPLAY_DAY_FMT = new SimpleDateFormat("EEEE, d 'de' MMMM", new Locale("pt", "BR"));
+    private static final SimpleDateFormat DISPLAY_DAY_FMT = new SimpleDateFormat("EEEE, d MMMM", Locale.ENGLISH);
     private static final SimpleDateFormat TIME_FMT = new SimpleDateFormat("HH:mm", Locale.US);
 
     // getDayOverview() for a past (non-today) date never changes once
@@ -59,7 +59,7 @@ public final class DailyStatsProvider {
             this.startMs = startMs;
             this.endMs = endMs;
             this.timeLabel = TIME_FMT.format(new Date(startMs)) + " – "
-                    + (endMs > 0 ? TIME_FMT.format(new Date(endMs)) : "em andamento");
+                    + (endMs > 0 ? TIME_FMT.format(new Date(endMs)) : "in progress");
             this.durationLabel = formatDuration(startMs, endMs > 0 ? endMs : System.currentTimeMillis());
         }
 
@@ -379,8 +379,8 @@ public final class DailyStatsProvider {
         try { return c.moveToFirst() && c.getInt(0) != 0; } finally { c.close(); }
     }
 
-    private static final SimpleDateFormat WEEK_BOUND_FMT = new SimpleDateFormat("d 'de' MMM", new Locale("pt", "BR"));
-    private static final SimpleDateFormat MONTH_LABEL_FMT = new SimpleDateFormat("MMMM 'de' yyyy", new Locale("pt", "BR"));
+    private static final SimpleDateFormat WEEK_BOUND_FMT = new SimpleDateFormat("d MMM", Locale.ENGLISH);
+    private static final SimpleDateFormat MONTH_LABEL_FMT = new SimpleDateFormat("MMMM yyyy", Locale.ENGLISH);
 
     private static String weekLabel(List<String> weekDates) {
         try {
@@ -394,7 +394,7 @@ public final class DailyStatsProvider {
 
     private static String monthLabel(String anyDateInMonth) {
         String s = MONTH_LABEL_FMT.format(dayCalendar(anyDateInMonth).getTime());
-        return s.substring(0, 1).toUpperCase(new Locale("pt", "BR")) + s.substring(1);
+        return s.substring(0, 1).toUpperCase(Locale.ENGLISH) + s.substring(1);
     }
 
     /** The most recent `count` calendar weeks (Monday-start), oldest first,

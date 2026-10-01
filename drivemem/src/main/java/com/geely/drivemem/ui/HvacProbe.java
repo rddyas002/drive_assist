@@ -41,13 +41,13 @@ public class HvacProbe extends Activity {
         out = new TextView(this);
         out.setTextSize(13);
         out.setPadding(24,24,24,24);
-        out.setText("Lendo HVAC...");
+        out.setText("Reading HVAC...");
         sv.addView(out);
         setContentView(sv);
 
         CarActor.get(this).runOnCarThread(() -> {
             CarAccess car = CarActor.get(this).rawAccess();
-            if (!car.isReady() && !car.connect(getApplicationContext())) { post("FALHA conectar Car"); return; }
+            if (!car.isReady() && !car.connect(getApplicationContext())) { post("FAILED to connect to vehicle"); return; }
             StringBuilder sb = new StringBuilder();
             for (Object[] p : PROPS) {
                 int prop = (Integer) p[0]; String name = (String) p[1]; char t = (Character) p[2];
@@ -57,7 +57,7 @@ public class HvacProbe extends Activity {
                     String v = car.readAny(prop, a, t);
                     if (v != null) { line += "[a" + a + "=" + v + "] "; any = true; }
                 }
-                if (!any) line += "(sem leitura)";
+                if (!any) line += "(no reading)";
                 sb.append(line).append("\n\n");
             }
             post(sb.toString());

@@ -24,10 +24,10 @@ public class GpsProbe extends Activity {
         super.onCreate(b);
         ScrollView sv = new ScrollView(this);
         out = new TextView(this); out.setTextSize(13); out.setPadding(24,24,24,24);
-        out.setText("Lendo GPS..."); sv.addView(out); setContentView(sv);
+        out.setText("Reading GPS..."); sv.addView(out); setContentView(sv);
         CarActor.get(this).runOnCarThread(() -> {
             CarAccess car = CarActor.get(this).rawAccess();
-            if (!car.isReady() && !car.connect(getApplicationContext())) { post("sem car"); return; }
+            if (!car.isReady() && !car.connect(getApplicationContext())) { post("vehicle unavailable"); return; }
             StringBuilder sb = new StringBuilder("LOCALIZACAO:\n\n");
             probeAll(car, sb, "GPS_INFO", GPS_INFO);
             probeAll(car, sb, "DVR_CUR_LOCATION", DVR_LOC);

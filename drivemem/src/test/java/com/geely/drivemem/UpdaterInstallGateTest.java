@@ -43,7 +43,7 @@ public class UpdaterInstallGateTest {
         ChargeSession.setSessionStateForTesting(true, false, System.currentTimeMillis(), 50, 60, 1000, 5);
         assertFalse(ChargeSession.isCharging());
         assertTrue(ChargeSession.isSessionActive());
-        assertEquals("bloqueado: veículo carregando", Updater.installBlockedReason(false));
+        assertEquals("blocked: vehicle is charging", Updater.installBlockedReason(false));
     }
 
     @Test public void blockedWhileGracePeriodPending() {
@@ -52,7 +52,7 @@ public class UpdaterInstallGateTest {
         ChargeSession.onChargingEdge(null, false);
         assertFalse(ChargeSession.isCharging());
         assertTrue(ChargeSession.isChargeGraceScheduled());
-        assertEquals("bloqueado: veículo carregando", Updater.installBlockedReason(false));
+        assertEquals("blocked: vehicle is charging", Updater.installBlockedReason(false));
     }
 
     @Test public void forceBypassesBothChecks() {

@@ -231,7 +231,7 @@ public class MqttReporter {
     private int publishFails = 0;
     private int lastBright = 0;
     private String lastChargingState = null;
-    private int parkDurCode = 0x13;   // duration chosen in the select (default Ilimitado)
+    private int parkDurCode = 0x13;   // duration chosen in the select (default Unlimited)
     // Last address that connected. Away from home (phone Wi-Fi) the LAN is
     // unreachable: trying the remote one that already worked first avoids
     // burning the LAN timeout on every cold reconnect.
@@ -387,8 +387,8 @@ public class MqttReporter {
         h.post(() -> {
             boolean ok = ensureConnected(true);
             String detail;
-            if (!ok) detail = "Falha ao conectar ao broker";
-            else if (sample == null || sample.isEmpty()) detail = "Conectou, mas sem dados do carro";
+            if (!ok) detail = "Could not connect to the broker";
+            else if (sample == null || sample.isEmpty()) detail = "Connected, but no vehicle data was available";
             else { doPublishState(sample); detail = "OK — publicado"; }
             cb.onResult(ok, detail);
         });
@@ -401,12 +401,12 @@ public class MqttReporter {
             boolean ok = ensureConnected(true);
             String detail;
             if (!ok) {
-                detail = "Falha ao conectar ao broker";
+                detail = "Could not connect to the broker";
             } else {
                 discoverySent = false;
                 trackerDiscovered = false;
                 sendDiscovery();
-                detail = "OK — descoberta MQTT enviada";
+                detail = "OK — MQTT discovery sent";
             }
             if (cb != null) cb.onResult(ok, detail);
         });
@@ -976,16 +976,16 @@ public class MqttReporter {
         Log.i(TAG, "CMD update from HA: " + body);
 
         if (body != null && body.toLowerCase(java.util.Locale.US).contains("force")) {
-            pub(UPDATE_STATE_TOPIC, "iniciando (forçado)", false);
+            pub(UPDATE_STATE_TOPIC, "starting (forced)", false);
             Updater.update(ctx, body, s -> pub(UPDATE_STATE_TOPIC, s, false));
             return;
         }
 
-        pub(UPDATE_STATE_TOPIC, "verificando", false);
+        pub(UPDATE_STATE_TOPIC, "checking", false);
         Updater.check(ctx, body, new Updater.CheckCallback() {
             @Override
             public void onUpdateAvailable(Updater.UpdateInfo info) {
-                pub(UPDATE_STATE_TOPIC, "disponivel: " + info.versionName, false);
+                pub(UPDATE_STATE_TOPIC, "available: " + info.versionName, false);
                 Intent it = new Intent(Updater.ACTION_UPDATE_AVAILABLE);
                 it.putExtra("versionName", info.versionName);
                 it.putExtra("versionCode", info.versionCode);
@@ -996,12 +996,12 @@ public class MqttReporter {
 
             @Override
             public void onAlreadyUpToDate(String currentVer) {
-                pub(UPDATE_STATE_TOPIC, "já atualizado (" + currentVer + ")", false);
+                pub(UPDATE_STATE_TOPIC, "up to date (" + currentVer + ")", false);
             }
 
             @Override
             public void onError(String error) {
-                pub(UPDATE_STATE_TOPIC, "erro: " + error, false);
+                pub(UPDATE_STATE_TOPIC, "error: " + error, false);
             }
         });
     }
@@ -1017,16 +1017,16 @@ public class MqttReporter {
         Log.i(TAG, "CMD update (modehelper) from HA: " + body);
 
         if (body != null && body.toLowerCase(java.util.Locale.US).contains("force")) {
-            pub(UPDATE_HELPER_STATE_TOPIC, "iniciando (forçado)", false);
+            pub(UPDATE_HELPER_STATE_TOPIC, "starting (forced)", false);
             Updater.updateHelper(ctx, body, s -> pub(UPDATE_HELPER_STATE_TOPIC, s, false));
             return;
         }
 
-        pub(UPDATE_HELPER_STATE_TOPIC, "verificando", false);
+        pub(UPDATE_HELPER_STATE_TOPIC, "checking", false);
         Updater.check(ctx, body, Updater.HELPER_PKG, new Updater.CheckCallback() {
             @Override
             public void onUpdateAvailable(Updater.UpdateInfo info) {
-                pub(UPDATE_HELPER_STATE_TOPIC, "disponivel: " + info.versionName, false);
+                pub(UPDATE_HELPER_STATE_TOPIC, "available: " + info.versionName, false);
                 Intent it = new Intent(Updater.ACTION_UPDATE_AVAILABLE);
                 it.putExtra("versionName", info.versionName);
                 it.putExtra("versionCode", info.versionCode);
@@ -1040,12 +1040,12 @@ public class MqttReporter {
 
             @Override
             public void onAlreadyUpToDate(String currentVer) {
-                pub(UPDATE_HELPER_STATE_TOPIC, "já atualizado (" + currentVer + ")", false);
+                pub(UPDATE_HELPER_STATE_TOPIC, "up to date (" + currentVer + ")", false);
             }
 
             @Override
             public void onError(String error) {
-                pub(UPDATE_HELPER_STATE_TOPIC, "erro: " + error, false);
+                pub(UPDATE_HELPER_STATE_TOPIC, "error: " + error, false);
             }
         });
     }
@@ -1200,7 +1200,7 @@ public class MqttReporter {
 
     private void sendTrackerDiscovery() {
         String cfg = "{"
-            + "\"name\":\"Localização\",\"uniq_id\":\"" + DEV_ID + "_tracker\","
+            + "\"name\":\"Location\",\"uniq_id\":\"" + DEV_ID + "_tracker\","
             + "\"json_attr_t\":\"" + TRACKER_ATTR_TOPIC + "\","
             + "\"source_type\":\"gps\","
             + getDeviceJson()
@@ -1405,9 +1405,9 @@ public class MqttReporter {
     // without a second publish or a second topic to keep in sync.
     private void sendEnergyDiscovery() {
         String dev = getDeviceJson();
-        sendEnergySensor("energy_spent_kwh", "Energia Gasta", dev);
-        sendEnergySensor("energy_regen_kwh", "Energia Recuperada", dev);
-        sendEnergySensor("energy_net_kwh", "Energia Líquida", dev);
+        sendEnergySensor("energy_spent_kwh", "Energy Used", dev);
+        sendEnergySensor("energy_regen_kwh", "Energy Recovered", dev);
+        sendEnergySensor("energy_net_kwh", "Net Energy", dev);
     }
 
     private void sendEnergySensor(String key, String name, String dev) {
@@ -1431,7 +1431,7 @@ public class MqttReporter {
         pub("homeassistant/sensor/" + DEV_ID + "/park_timer/config", "", true);
 
         String sw = "{"
-            + "\"name\":\"Modo Estacionamento\","
+            + "\"name\":\"Parking Mode\","
             + "\"uniq_id\":\"" + DEV_ID + "_park_sw\","
             + "\"cmd_t\":\"" + PARK_CMD_TOPIC + "\","
             + "\"stat_t\":\"" + PARK_STATE_TOPIC + "\","
@@ -1440,12 +1440,12 @@ public class MqttReporter {
             + "}";
         pub("homeassistant/switch/" + DEV_ID + "/park/config", sw, true);
         String sel = "{"
-            + "\"name\":\"Timer estacionamento\","
+            + "\"name\":\"Parking Timer\","
             + "\"uniq_id\":\"" + DEV_ID + "_park_timer_sel\","
             + "\"cmd_t\":\"" + PARK_TIMER_CMD_TOPIC + "\","
             + "\"stat_t\":\"" + PARK_TIMER_STATE_TOPIC + "\","
             + "\"avty_t\":\"" + AVAIL_TOPIC + "\","
-            + "\"options\":[\"30 min\",\"1 h\",\"2 h\",\"3 h\",\"4 h\",\"5 h\",\"Ilimitado\"],"
+            + "\"options\":[\"30 min\",\"1 h\",\"2 h\",\"3 h\",\"4 h\",\"5 h\",\"Unlimited\"],"
             + "\"ic\":\"mdi:timer-outline\"," + dev
             + "}";
         pub("homeassistant/select/" + DEV_ID + "/park_timer/config", sel, true);
@@ -1466,11 +1466,11 @@ public class MqttReporter {
         return "{\"name\":\"" + name + "\",\"code\":" + code + "}";
     }
 
-    // "Atualizar Drive Assist" button + update status sensor
+    // "Update Drive Assist" button + update status sensor
     private void sendUpdateDiscovery() {
         String dev = getDeviceJson();
         String btn = "{"
-            + "\"name\":\"Atualizar Drive Assist\","
+            + "\"name\":\"Update Drive Assist\","
             + "\"uniq_id\":\"" + DEV_ID + "_update\","
             + "\"cmd_t\":\"" + UPDATE_CMD_TOPIC + "\","
             + "\"payload_press\":\"go\","
@@ -1479,7 +1479,7 @@ public class MqttReporter {
             + "}";
         pub("homeassistant/button/" + DEV_ID + "/update/config", btn, true);
         String sen = "{"
-            + "\"name\":\"Atualização Drive Assist\","
+            + "\"name\":\"Drive Assist Update\","
             + "\"uniq_id\":\"" + DEV_ID + "_update_state\","
             + "\"stat_t\":\"" + UPDATE_STATE_TOPIC + "\","
             + "\"avty_t\":\"" + AVAIL_TOPIC + "\","
@@ -1490,7 +1490,7 @@ public class MqttReporter {
         // while the car is asleep, which is exactly when HA would grey out an
         // availability-gated entity.
         String ver = "{"
-            + "\"name\":\"Versão Drive Assist\","
+            + "\"name\":\"Drive Assist Version\","
             + "\"uniq_id\":\"" + DEV_ID + "_version\","
             + "\"stat_t\":\"" + VERSION_TOPIC + "\","
             + "\"val_tpl\":\"{{ value_json.name }}\","
@@ -1519,8 +1519,8 @@ public class MqttReporter {
         // pressing them at a car that is not listening should look disabled, not
         // silently do nothing.
         for (String[] b : new String[][]{
-                {"cool", "Mais frio",   "mdi:snowflake"},
-                {"warm", "Mais quente", "mdi:fire"}}) {
+                {"cool", "Cooler", "mdi:snowflake"},
+                {"warm", "Warmer", "mdi:fire"}}) {
             String j = "{"
                 + "\"name\":\"" + b[1] + "\","
                 + "\"uniq_id\":\"" + DEV_ID + "_act_" + b[0] + "\","
@@ -1532,7 +1532,7 @@ public class MqttReporter {
             pub("homeassistant/button/" + DEV_ID + "/act_" + b[0] + "/config", j, true);
         }
         String cmf = "{"
-            + "\"name\":\"Conforto\","
+            + "\"name\":\"Comfort\","
             + "\"uniq_id\":\"" + DEV_ID + "_comfort\","
             + "\"stat_t\":\"" + COMFORT_STATE_TOPIC + "\","
             + "\"val_tpl\":\"{{ value_json.status }}\","
@@ -1544,7 +1544,7 @@ public class MqttReporter {
 
     private void sendChargeNumberDiscovery() {
         String j = "{"
-            + "\"name\":\"Limite de corrente de carga\","
+            + "\"name\":\"Charging Current Limit\","
             + "\"uniq_id\":\"" + DEV_ID + "_charge_limit\","
             + "\"cmd_t\":\"" + CHARGE_CMD_TOPIC + "\","
             + "\"stat_t\":\"" + CHARGE_LIMIT_STATE_TOPIC + "\","
@@ -1558,7 +1558,7 @@ public class MqttReporter {
 
     private void sendChargeSwitchDiscovery() {
         String j = "{"
-            + "\"name\":\"Carregamento\","
+            + "\"name\":\"Charging\","
             + "\"uniq_id\":\"" + DEV_ID + "_charging\","
             + "\"cmd_t\":\"" + CHARGE_SW_CMD_TOPIC + "\","
             + "\"stat_t\":\"" + CHARGE_SW_STATE_TOPIC + "\","
@@ -1574,7 +1574,7 @@ public class MqttReporter {
     // STATE_TOPIC JSON every telemetry tick (Telemetry.java's plug_connected).
     private void sendPlugDiscovery() {
         String j = "{"
-            + "\"name\":\"Cabo conectado\","
+            + "\"name\":\"Cable Connected\","
             + "\"uniq_id\":\"" + DEV_ID + "_plug_connected\","
             + "\"stat_t\":\"" + STATE_TOPIC + "\","
             + "\"avty_t\":\"" + AVAIL_TOPIC + "\","
@@ -1587,7 +1587,7 @@ public class MqttReporter {
 
     private void sendLightDiscovery() {
         String cfg = "{"
-            + "\"name\":\"Luz ambiente\",\"uniq_id\":\"" + DEV_ID + "_light\","
+            + "\"name\":\"Ambient Light\",\"uniq_id\":\"" + DEV_ID + "_light\","
             + "\"schema\":\"json\",\"supported_color_modes\":[\"rgb\"],\"brightness\":true,"
             + "\"cmd_t\":\"" + LIGHT_CMD_TOPIC + "\","
             + "\"stat_t\":\"" + LIGHT_STATE_TOPIC + "\","

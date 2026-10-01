@@ -73,12 +73,12 @@ public class MqttDiscoveryTest {
     @Test
     public void testTrackerDiscoveryJsonFormat() throws Exception {
         JSONObject tracker = new JSONObject();
-        tracker.put("name", "Localização");
+        tracker.put("name", "Location");
         tracker.put("uniq_id", "testdev_tracker");
         tracker.put("json_attr_t", "drivemem/geely/tracker/attributes");
         tracker.put("source_type", "gps");
 
-        assertEquals("Localização", tracker.getString("name"));
+        assertEquals("Location", tracker.getString("name"));
         assertEquals("testdev_tracker", tracker.getString("uniq_id"));
         assertEquals("drivemem/geely/tracker/attributes", tracker.getString("json_attr_t"));
         assertEquals("gps", tracker.getString("source_type"));

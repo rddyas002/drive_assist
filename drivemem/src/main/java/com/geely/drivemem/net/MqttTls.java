@@ -131,7 +131,7 @@ public final class MqttTls {
                     // try our CA; if that does not do it, try the system ones
                     try { if (ours != null) { ours.checkServerTrusted(c, a); return; } }
                     catch (java.security.cert.CertificateException ignored) {}
-                    if (sys == null) throw new java.security.cert.CertificateException("sem trust manager");
+                    if (sys == null) throw new java.security.cert.CertificateException("no trust manager");
                     sys.checkServerTrusted(c, a);
                 }
                 @Override public X509Certificate[] getAcceptedIssuers() {

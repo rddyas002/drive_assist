@@ -475,7 +475,7 @@ public class TelemetryActivity extends Activity {
                     mqttSection.importCertFromFile(is);
                 }
             } catch (Throwable t) {
-                Toast.makeText(this, "Erro ao carregar arquivo selecionado: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Could not load the selected file: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }

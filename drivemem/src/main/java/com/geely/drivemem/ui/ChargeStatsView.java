@@ -239,7 +239,7 @@ public class ChargeStatsView extends LinearLayout {
         // Unit style guide (2026-09-13): the unit renders smaller/dimmer than
         // its value everywhere -- Style.valueWithUnit, not a plain concatenated string.
         statsRow1.addView(statTile(Style.valueWithUnit(String.format(Locale.US, "%.1f", totalKwh),
-            Style.COOL, "kWh", Style.UNIT_SCALE_HERO), "Energia", Style.COOL));
+            Style.COOL, "kWh", Style.UNIT_SCALE_HERO), "Energy", Style.COOL));
         String costStr = costSessionCount > 0 ? String.format(Locale.getDefault(), "R$ %.2f", totalCost) : "—";
         statsRow1.addView(statTile(costStr, c.getString(R.string.charge_stat_total_cost), Style.TEXT));
         statsCard.addView(statsRow1);
@@ -257,7 +257,7 @@ public class ChargeStatsView extends LinearLayout {
             ? String.format(Locale.getDefault(), "R$ %.2f", (totalCost / kmDriven) * 100) : "—";
         statsRow2.addView(statTile(costPer100kmStr, c.getString(R.string.charge_stat_cost_100km), Style.TEXT));
         statsRow2.addView(statTile(Style.valueWithUnit(String.format(Locale.US, "%.0f", kmDriven),
-            Style.TEXT_DIM, "km", Style.UNIT_SCALE_HERO), "Distância", Style.TEXT_DIM));
+            Style.TEXT_DIM, "km", Style.UNIT_SCALE_HERO), "Distance", Style.TEXT_DIM));
         statsCard.addView(statsRow2);
 
         LinearLayout.LayoutParams statsCardLp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 7f);
@@ -502,7 +502,7 @@ public class ChargeStatsView extends LinearLayout {
         SpannableStringBuilder power = new SpannableStringBuilder();
         power.append(Style.valueWithUnit(String.format(Locale.getDefault(), "%.1f", s.avgPowerW / 1000.0),
             Style.TEXT, "kW", Style.UNIT_SCALE_ROW));
-        Style.appendUnit(power, " méd.", Style.UNIT_SCALE_ROW);
+        Style.appendUnit(power, " avg.", Style.UNIT_SCALE_ROW);
         powerText.setText(power);
         powerText.setTextSize(19);
         powerText.setTypeface(null, Typeface.BOLD);

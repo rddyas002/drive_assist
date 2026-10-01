@@ -37,10 +37,10 @@ public class ChargeProbe extends Activity {
         super.onCreate(b);
         ScrollView sv = new ScrollView(this);
         out = new TextView(this); out.setTextSize(14); out.setPadding(24,24,24,24);
-        out.setText("Lendo carga..."); sv.addView(out); setContentView(sv);
+        out.setText("Reading charging data..."); sv.addView(out); setContentView(sv);
         CarActor.get(this).runOnCarThread(() -> {
             CarAccess car = CarActor.get(this).rawAccess();
-            if (!car.isReady() && !car.connect(getApplicationContext())) { post("sem car"); return; }
+            if (!car.isReady() && !car.connect(getApplicationContext())) { post("vehicle unavailable"); return; }
             StringBuilder sb = new StringBuilder("CARGA (so leitura):\n\n");
             for (Object[] p : P) {
                 int prop = (Integer) p[0]; String name = (String) p[1]; char t = (Character) p[2];

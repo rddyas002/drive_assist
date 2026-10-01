@@ -313,7 +313,7 @@ public final class TelemetryMqttSection extends LinearLayout {
         mqttLogScroll.addView(mqttLogView);
         right.addView(mqttLogScroll);
 
-        logMqtt("INIT", "Painel MQTT inicializado. ID: " + MqttReporter.getClientId());
+        logMqtt("INIT", "MQTT panel initialized. ID: " + MqttReporter.getClientId());
     }
 
     // =====================================================================
@@ -399,7 +399,7 @@ public final class TelemetryMqttSection extends LinearLayout {
             byte[] bytes = CertImporter.readStreamBytes(is);
             tryImportBytes(bytes, null);
         } catch (Throwable t) {
-            showErrorDialog("Erro ao carregar arquivo selecionado: " + t.getMessage());
+            showErrorDialog("Could not load the selected file: " + t.getMessage());
         }
     }
 
@@ -491,7 +491,7 @@ public final class TelemetryMqttSection extends LinearLayout {
                             byte[] bytes = CertImporter.readStreamBytes(new java.io.FileInputStream(f));
                             promptPasswordIfNeeded(bytes);
                         } catch (Throwable t) {
-                            showErrorDialog("Erro ao carregar arquivo: " + t.getMessage());
+                            showErrorDialog("Could not load the file: " + t.getMessage());
                         }
                     })
                     .setNegativeButton(android.R.string.cancel, null)
@@ -507,7 +507,7 @@ public final class TelemetryMqttSection extends LinearLayout {
         new android.app.AlertDialog.Builder(activity)
             .setTitle(activity.getString(R.string.cfg_cert_import_url))
             .setView(input)
-            .setPositiveButton("Baixar", (dialog, which) -> {
+            .setPositiveButton("Download", (dialog, which) -> {
                 String url = input.getText().toString().trim();
                 if (url.isEmpty()) return;
                 new Thread(() -> {
@@ -516,7 +516,7 @@ public final class TelemetryMqttSection extends LinearLayout {
                         byte[] bytes = CertImporter.readStreamBytes(is);
                         activity.runOnUiThread(() -> promptPasswordIfNeeded(bytes));
                     } catch (Throwable t) {
-                        activity.runOnUiThread(() -> showErrorDialog("Erro ao baixar: " + t.getMessage()));
+                        activity.runOnUiThread(() -> showErrorDialog("Download failed: " + t.getMessage()));
                     }
                 }).start();
             })
@@ -530,7 +530,7 @@ public final class TelemetryMqttSection extends LinearLayout {
         try {
             activity.startActivityForResult(Intent.createChooser(intent, activity.getString(R.string.cfg_cert_import_file)), 4201);  // REQ_CODE_PICK_CERT
         } catch (Throwable t) {
-            showErrorDialog("Erro ao abrir seletor de arquivos: " + t.getMessage());
+            showErrorDialog("Could not open the file picker: " + t.getMessage());
         }
     }
 
@@ -541,14 +541,14 @@ public final class TelemetryMqttSection extends LinearLayout {
         new android.app.AlertDialog.Builder(activity)
             .setTitle(activity.getString(R.string.cfg_cert_import_paste))
             .setView(input)
-            .setPositiveButton("Importar", (dialog, which) -> {
+            .setPositiveButton("Import", (dialog, which) -> {
                 String pem = input.getText().toString().trim();
                 if (pem.isEmpty()) return;
                 try {
                     byte[] bytes = pem.getBytes("UTF-8");
                     promptPasswordIfNeeded(bytes);
                 } catch (Throwable t) {
-                    showErrorDialog("Erro ao processar PEM: " + t.getMessage());
+                    showErrorDialog("Could not process the PEM data: " + t.getMessage());
                 }
             })
             .setNegativeButton(android.R.string.cancel, null)
@@ -572,9 +572,9 @@ public final class TelemetryMqttSection extends LinearLayout {
                     if (res.success) {
                         refreshCertUi();
                         String details = res.certInfo != null ?
-                            "\n\nNome: " + res.certInfo.getCommonName() +
-                            "\nEmissor: " + CertImporter.extractCN(res.certInfo.issuer) +
-                            "\nVálido até: " + res.certInfo.getFormattedExpiry() : "";
+                            "\n\nName: " + res.certInfo.getCommonName() +
+                            "\nIssuer: " + CertImporter.extractCN(res.certInfo.issuer) +
+                            "\nValid until: " + res.certInfo.getFormattedExpiry() : "";
                         new android.app.AlertDialog.Builder(activity)
                             .setTitle(activity.getString(R.string.cfg_certs_header))
                             .setMessage(res.message + details)
@@ -586,7 +586,7 @@ public final class TelemetryMqttSection extends LinearLayout {
                     }
                 });
             } catch (Throwable t) {
-                activity.runOnUiThread(() -> showErrorDialog("Erro na importação: " + t.getMessage()));
+                activity.runOnUiThread(() -> showErrorDialog("Import failed: " + t.getMessage()));
             }
         }).start();
     }
@@ -597,7 +597,7 @@ public final class TelemetryMqttSection extends LinearLayout {
         new android.app.AlertDialog.Builder(activity)
             .setTitle(activity.getString(R.string.cfg_cert_password_title))
             .setView(input)
-            .setPositiveButton("Importar", (dialog, which) -> {
+            .setPositiveButton("Import", (dialog, which) -> {
                 String password = input.getText().toString();
                 tryImportBytes(bytes, password);
             })
@@ -609,7 +609,7 @@ public final class TelemetryMqttSection extends LinearLayout {
         new android.app.AlertDialog.Builder(activity)
             .setTitle(activity.getString(R.string.cfg_cert_remove_title))
             .setMessage(activity.getString(R.string.cfg_cert_remove_confirm))
-            .setPositiveButton("Remover", (dialog, which) -> {
+            .setPositiveButton("Remove", (dialog, which) -> {
                 CertImporter.removeClientCert(activity);
                 refreshCertUi();
                 Toast.makeText(activity, activity.getString(R.string.cfg_cert_removed), Toast.LENGTH_SHORT).show();
@@ -622,7 +622,7 @@ public final class TelemetryMqttSection extends LinearLayout {
         new android.app.AlertDialog.Builder(activity)
             .setTitle(activity.getString(R.string.cfg_ca_reset_title))
             .setMessage(activity.getString(R.string.cfg_ca_reset_confirm))
-            .setPositiveButton("Restaurar Padrão", (dialog, which) -> {
+            .setPositiveButton("Restore Default", (dialog, which) -> {
                 CertImporter.removeCustomCaCert(activity);
                 refreshCertUi();
                 Toast.makeText(activity, activity.getString(R.string.cfg_ca_reset_ok), Toast.LENGTH_SHORT).show();
@@ -647,11 +647,11 @@ public final class TelemetryMqttSection extends LinearLayout {
         tlsTestStatus.setTextColor(Style.TEXT_DIM);
         tlsTestStatus.setText(activity.getString(R.string.cfg_cert_testing_tls) + " (" + target + ")...");
 
-        logMqtt("TLS", "Testando handshake TLS para: " + target);
+        logMqtt("TLS", "Testing TLS handshake with: " + target);
         CertImporter.testTls(activity, target, (ok, msg) -> {
             tlsTestStatus.setTextColor(ok ? 0xFF81C784 : 0xFFE57373);
             tlsTestStatus.setText(msg);
-            logMqtt("TLS", (ok ? "SUCESSO: " : "ERRO: ") + msg);
+            logMqtt("TLS", (ok ? "SUCCESS: " : "ERROR: ") + msg);
         });
     }
 
@@ -664,8 +664,8 @@ public final class TelemetryMqttSection extends LinearLayout {
         String[] targets = uri.split("[,\\s]+");
         final String firstTarget = (targets.length > 0 && !targets[0].isEmpty()) ? targets[0] : uri;
 
-        logMqtt("TEST", "Iniciando teste de conexão para: " + firstTarget);
-        logMqtt("TEST", "Lendo dados dos sensores do veículo...");
+        logMqtt("TEST", "Starting connection test for: " + firstTarget);
+        logMqtt("TEST", "Reading vehicle sensor data...");
 
         CarActor.get(activity).runOnCarThread(() -> {
             CarActor actor = CarActor.get(activity);
@@ -674,8 +674,8 @@ public final class TelemetryMqttSection extends LinearLayout {
             java.util.LinkedHashMap<String, Object> data = carOk
                 ? Telemetry.snapshot(c, CarActor.chargingFrom(actor.get("car.is_charging")))
                 : new java.util.LinkedHashMap<>();
-            logMqtt("TEST", "Sensores lidos: " + data.size() + " campos (CarAccess ok=" + carOk + ")");
-            logMqtt("TEST", "Publicando em '" + MqttReporter.getBaseTopic() + "/state'...");
+            logMqtt("TEST", "Sensors read: " + data.size() + " fields (CarAccess ok=" + carOk + ")");
+            logMqtt("TEST", "Publishing to '" + MqttReporter.getBaseTopic() + "/state'...");
 
             final MqttReporter r = new MqttReporter(
                     uri, "", u, pw, activity.getApplicationContext(), true);
@@ -683,10 +683,10 @@ public final class TelemetryMqttSection extends LinearLayout {
                 activity.runOnUiThread(() -> {
                     status.setText(detail);
                     if (ok) {
-                        logMqtt("TEST", "SUCESSO: " + detail);
-                        logMqtt("TEST", "Tópico de estado atualizado no broker!");
+                        logMqtt("TEST", "SUCCESS: " + detail);
+                        logMqtt("TEST", "State topic updated on the broker!");
                     } else {
-                        logMqtt("TEST", "ERRO: " + detail);
+                        logMqtt("TEST", "ERROR: " + detail);
                     }
                     updateStatusCard();
                 });
@@ -698,17 +698,17 @@ public final class TelemetryMqttSection extends LinearLayout {
     private void forceDiscoveryNow() {
         saveAll(Prefs.getTeleEnabled(activity));
         status.setText(activity.getString(R.string.cfg_discovery_sending));
-        logMqtt("DISCOVERY", "Solicitando envio de descoberta MQTT (47 entidades)...");
+        logMqtt("DISCOVERY", "Requesting MQTT discovery publication (47 entities)...");
         TelemetryService svc = TelemetryService.getInstance();
         if (svc != null && svc.isRunning()) {
             svc.triggerDiscovery((ok, detail) -> activity.runOnUiThread(() -> {
                 String msg = ok ? activity.getString(R.string.cfg_discovery_ok) : activity.getString(R.string.cfg_discovery_failed, detail);
                 status.setText(msg);
                 if (ok) {
-                    logMqtt("DISCOVERY", "SUCESSO: " + detail);
-                    logMqtt("DISCOVERY", "Entidades recriadas em 'homeassistant/.../" + MqttReporter.getDevId() + "/...'");
+                    logMqtt("DISCOVERY", "SUCCESS: " + detail);
+                    logMqtt("DISCOVERY", "Entities recreated under 'homeassistant/.../" + MqttReporter.getDevId() + "/...'");
                 } else {
-                    logMqtt("DISCOVERY", "FALHA: " + detail);
+                    logMqtt("DISCOVERY", "FAILED: " + detail);
                 }
                 Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
                 updateStatusCard();
@@ -718,7 +718,7 @@ public final class TelemetryMqttSection extends LinearLayout {
         final String uri = (fUri != null) ? fUri.getText().toString().trim() : Prefs.getMqttUri(activity, "");
         final String u = (fUser != null) ? fUser.getText().toString().trim() : Prefs.getMqttUser(activity, "");
         final String pw = (fPass != null) ? fPass.getText().toString() : Prefs.getMqttPass(activity);
-        logMqtt("DISCOVERY", "Conectando cliente direto para publicar descoberta...");
+        logMqtt("DISCOVERY", "Connecting a direct client to publish discovery...");
         CarActor.get(activity).runOnCarThread(() -> {
             final MqttReporter r = new MqttReporter(
                     uri, "", u, pw, activity.getApplicationContext(), true);
@@ -727,9 +727,9 @@ public final class TelemetryMqttSection extends LinearLayout {
                     String msg = ok ? activity.getString(R.string.cfg_discovery_ok) : activity.getString(R.string.cfg_discovery_failed, detail);
                     status.setText(msg);
                     if (ok) {
-                        logMqtt("DISCOVERY", "SUCESSO: " + detail);
+                        logMqtt("DISCOVERY", "SUCCESS: " + detail);
                     } else {
-                        logMqtt("DISCOVERY", "FALHA: " + detail);
+                        logMqtt("DISCOVERY", "FAILED: " + detail);
                     }
                     Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
                     updateStatusCard();
@@ -812,7 +812,7 @@ public final class TelemetryMqttSection extends LinearLayout {
 
         updateStatusCard();
         Toast.makeText(activity, activity.getString(R.string.cfg_saved), Toast.LENGTH_SHORT).show();
-        logMqtt("CONFIG", "Configurações salvas e aplicadas.");
+        logMqtt("CONFIG", "Settings saved and applied.");
     }
 
     private void logMqtt(String tag, String msg) {
@@ -833,7 +833,7 @@ public final class TelemetryMqttSection extends LinearLayout {
 
     private void showErrorDialog(String message) {
         new android.app.AlertDialog.Builder(activity)
-            .setTitle("Erro")
+            .setTitle("Error")
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, null)
             .show();
