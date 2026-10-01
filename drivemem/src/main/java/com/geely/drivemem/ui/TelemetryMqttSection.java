@@ -399,7 +399,7 @@ public final class TelemetryMqttSection extends LinearLayout {
             byte[] bytes = CertImporter.readStreamBytes(is);
             tryImportBytes(bytes, null);
         } catch (Throwable t) {
-            showErrorDialog("Could not load the selected file: " + t.getMessage());
+            showErrorDialog(activity.getString(R.string.cfg_file_load_failed, t.getMessage()));
         }
     }
 
@@ -413,9 +413,10 @@ public final class TelemetryMqttSection extends LinearLayout {
         clientBtnRow.removeAllViews();
         if (clientInfo != null) {
             clientCertStatus.setTextColor(clientInfo.isExpired ? 0xFFE57373 : Style.TEXT);
-            clientCertStatus.setText(activity.getString(R.string.cfg_cert_status_installed,
-                    clientInfo.getCommonName(), clientInfo.getFormattedExpiry()) +
-                    (clientInfo.isExpired ? " [EXPIRED]" : ""));
+            String installed = activity.getString(R.string.cfg_cert_status_installed,
+                clientInfo.getCommonName(), clientInfo.getFormattedExpiry());
+            clientCertStatus.setText(clientInfo.isExpired
+                ? activity.getString(R.string.cfg_cert_status_expired, installed) : installed);
             clientBtnRow.addView(Style.button(activity, activity.getString(R.string.cfg_btn_import_cert), Style.ACCENT, () -> showImportDialog(false)));
             clientBtnRow.addView(Style.button(activity, activity.getString(R.string.cfg_btn_remove_cert), 0xFF8A3A3A, this::confirmRemoveClientCert));
         } else {
@@ -436,8 +437,10 @@ public final class TelemetryMqttSection extends LinearLayout {
             caBtnRow.addView(Style.button(activity, activity.getString(R.string.cfg_btn_reset_default), 0xFF8A3A3A, this::confirmResetCustomCa));
         } else {
             caCertStatus.setTextColor(Style.TEXT_DIM);
-            String name = (caInfo != null) ? " (" + caInfo.getCommonName() + ")" : "";
-            caCertStatus.setText(activity.getString(R.string.cfg_ca_status_default) + name);
+            caCertStatus.setText(caInfo != null
+                ? activity.getString(R.string.cfg_ca_status_default_named,
+                    activity.getString(R.string.cfg_ca_status_default), caInfo.getCommonName())
+                : activity.getString(R.string.cfg_ca_status_default));
             caBtnRow.addView(Style.button(activity, activity.getString(R.string.cfg_btn_import_cert), Style.ACCENT, () -> showImportDialog(true)));
         }
     }
@@ -491,7 +494,8 @@ public final class TelemetryMqttSection extends LinearLayout {
                             byte[] bytes = CertImporter.readStreamBytes(new java.io.FileInputStream(f));
                             promptPasswordIfNeeded(bytes);
                         } catch (Throwable t) {
-                            showErrorDialog("Could not load the file: " + t.getMessage());
+                            showErrorDialog(activity.getString(R.string.cfg_file_load_failed,
+                                t.getMessage()));
                         }
                     })
                     .setNegativeButton(android.R.string.cancel, null)
@@ -507,7 +511,7 @@ public final class TelemetryMqttSection extends LinearLayout {
         new android.app.AlertDialog.Builder(activity)
             .setTitle(activity.getString(R.string.cfg_cert_import_url))
             .setView(input)
-            .setPositiveButton("Download", (dialog, which) -> {
+            .setPositiveButton(activity.getString(R.string.cfg_btn_download), (dialog, which) -> {
                 String url = input.getText().toString().trim();
                 if (url.isEmpty()) return;
                 new Thread(() -> {
@@ -516,7 +520,8 @@ public final class TelemetryMqttSection extends LinearLayout {
                         byte[] bytes = CertImporter.readStreamBytes(is);
                         activity.runOnUiThread(() -> promptPasswordIfNeeded(bytes));
                     } catch (Throwable t) {
-                        activity.runOnUiThread(() -> showErrorDialog("Download failed: " + t.getMessage()));
+                        activity.runOnUiThread(() -> showErrorDialog(activity.getString(
+                            R.string.cfg_download_failed, t.getMessage())));
                     }
                 }).start();
             })
@@ -530,7 +535,7 @@ public final class TelemetryMqttSection extends LinearLayout {
         try {
             activity.startActivityForResult(Intent.createChooser(intent, activity.getString(R.string.cfg_cert_import_file)), 4201);  // REQ_CODE_PICK_CERT
         } catch (Throwable t) {
-            showErrorDialog("Could not open the file picker: " + t.getMessage());
+            showErrorDialog(activity.getString(R.string.cfg_file_picker_failed, t.getMessage()));
         }
     }
 
@@ -541,14 +546,15 @@ public final class TelemetryMqttSection extends LinearLayout {
         new android.app.AlertDialog.Builder(activity)
             .setTitle(activity.getString(R.string.cfg_cert_import_paste))
             .setView(input)
-            .setPositiveButton("Import", (dialog, which) -> {
+            .setPositiveButton(activity.getString(R.string.cfg_btn_import_cert), (dialog, which) -> {
                 String pem = input.getText().toString().trim();
                 if (pem.isEmpty()) return;
                 try {
                     byte[] bytes = pem.getBytes("UTF-8");
                     promptPasswordIfNeeded(bytes);
                 } catch (Throwable t) {
-                    showErrorDialog("Could not process the PEM data: " + t.getMessage());
+                    showErrorDialog(activity.getString(R.string.cfg_pem_process_failed,
+                        t.getMessage()));
                 }
             })
             .setNegativeButton(android.R.string.cancel, null)
@@ -571,10 +577,11 @@ public final class TelemetryMqttSection extends LinearLayout {
                     }
                     if (res.success) {
                         refreshCertUi();
-                        String details = res.certInfo != null ?
-                            "\n\nName: " + res.certInfo.getCommonName() +
-                            "\nIssuer: " + CertImporter.extractCN(res.certInfo.issuer) +
-                            "\nValid until: " + res.certInfo.getFormattedExpiry() : "";
+                        String details = res.certInfo != null
+                            ? activity.getString(R.string.cfg_cert_details,
+                                res.certInfo.getCommonName(),
+                                CertImporter.extractCN(res.certInfo.issuer),
+                                res.certInfo.getFormattedExpiry()) : "";
                         new android.app.AlertDialog.Builder(activity)
                             .setTitle(activity.getString(R.string.cfg_certs_header))
                             .setMessage(res.message + details)
@@ -586,7 +593,8 @@ public final class TelemetryMqttSection extends LinearLayout {
                     }
                 });
             } catch (Throwable t) {
-                activity.runOnUiThread(() -> showErrorDialog("Import failed: " + t.getMessage()));
+                activity.runOnUiThread(() -> showErrorDialog(activity.getString(
+                    R.string.cfg_cert_import_failed, t.getMessage())));
             }
         }).start();
     }
@@ -597,7 +605,7 @@ public final class TelemetryMqttSection extends LinearLayout {
         new android.app.AlertDialog.Builder(activity)
             .setTitle(activity.getString(R.string.cfg_cert_password_title))
             .setView(input)
-            .setPositiveButton("Import", (dialog, which) -> {
+            .setPositiveButton(activity.getString(R.string.cfg_btn_import_cert), (dialog, which) -> {
                 String password = input.getText().toString();
                 tryImportBytes(bytes, password);
             })
@@ -609,7 +617,7 @@ public final class TelemetryMqttSection extends LinearLayout {
         new android.app.AlertDialog.Builder(activity)
             .setTitle(activity.getString(R.string.cfg_cert_remove_title))
             .setMessage(activity.getString(R.string.cfg_cert_remove_confirm))
-            .setPositiveButton("Remove", (dialog, which) -> {
+            .setPositiveButton(activity.getString(R.string.cfg_btn_remove_cert), (dialog, which) -> {
                 CertImporter.removeClientCert(activity);
                 refreshCertUi();
                 Toast.makeText(activity, activity.getString(R.string.cfg_cert_removed), Toast.LENGTH_SHORT).show();
@@ -622,7 +630,7 @@ public final class TelemetryMqttSection extends LinearLayout {
         new android.app.AlertDialog.Builder(activity)
             .setTitle(activity.getString(R.string.cfg_ca_reset_title))
             .setMessage(activity.getString(R.string.cfg_ca_reset_confirm))
-            .setPositiveButton("Restore Default", (dialog, which) -> {
+            .setPositiveButton(activity.getString(R.string.cfg_btn_reset_default), (dialog, which) -> {
                 CertImporter.removeCustomCaCert(activity);
                 refreshCertUi();
                 Toast.makeText(activity, activity.getString(R.string.cfg_ca_reset_ok), Toast.LENGTH_SHORT).show();
@@ -645,7 +653,7 @@ public final class TelemetryMqttSection extends LinearLayout {
 
         tlsTestStatus.setVisibility(View.VISIBLE);
         tlsTestStatus.setTextColor(Style.TEXT_DIM);
-        tlsTestStatus.setText(activity.getString(R.string.cfg_cert_testing_tls) + " (" + target + ")...");
+        tlsTestStatus.setText(activity.getString(R.string.cfg_cert_testing_tls_target, target));
 
         logMqtt("TLS", "Testing TLS handshake with: " + target);
         CertImporter.testTls(activity, target, (ok, msg) -> {
@@ -833,7 +841,7 @@ public final class TelemetryMqttSection extends LinearLayout {
 
     private void showErrorDialog(String message) {
         new android.app.AlertDialog.Builder(activity)
-            .setTitle("Error")
+            .setTitle(activity.getString(R.string.common_error))
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, null)
             .show();

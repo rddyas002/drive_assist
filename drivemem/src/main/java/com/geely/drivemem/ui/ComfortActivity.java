@@ -1835,7 +1835,8 @@ public class ComfortActivity extends Activity {
         chargeCompletedMetrics.setText(String.format(Locale.US, "+%.1f kWh  •  %s  (%s)", s.kwh, socStr, s.durationLabel()));
 
         if (s.cost != null && s.cost >= 0) {
-            chargeCompletedCostText.setText(getString(R.string.charge_cost_label) + ": " + s.costLabel() + " (" + s.costPerKwhLabel() + ")");
+            chargeCompletedCostText.setText(getString(R.string.charge_completed_cost,
+                s.costLabel(), s.costPerKwhLabel()));
             chargeCostActionBtn.setText(getString(R.string.charge_cost_btn_edit));
         } else {
             chargeCompletedCostText.setText(getString(R.string.charge_cost_not_set));

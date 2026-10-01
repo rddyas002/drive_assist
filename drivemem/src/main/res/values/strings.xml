@@ -268,7 +268,7 @@
     <string name="cfg_appearance_light">Light</string>
     <string name="cfg_appearance_dark">Dark</string>
     <string name="cfg_appearance_auto">Auto</string>
-    <string name="cfg_appearance_note">Auto follows this head unit\'s own day/night setting. Neon and Noturno always use their one fixed color scheme, whatever this is set to.</string>
+    <string name="cfg_appearance_note">Auto follows this head unit\'s own day/night setting. Neon and Night always use their one fixed color scheme, whatever this is set to.</string>
     <string name="cfg_skyline_label">Show skyline art</string>
     <string name="cfg_skyline_header">Skyline</string>
     <string name="cfg_skyline_seed_header">Skyline Seed</string>
@@ -460,4 +460,97 @@
     <!-- daily stats day navigator -->
     <string name="daily_stats_prev_day">Previous</string>
     <string name="daily_stats_next_day">Next</string>
+
+    <!-- Remaining activity labels and programmatic UI text. The production
+         APK is English-only; keeping these in resources prevents a device
+         locale or a Java literal from reintroducing mixed-language screens. -->
+    <string name="activity_cleanup_label">Drive Assist — Cleanup</string>
+    <string name="activity_telemetry_label">Drive Assist — Telemetry</string>
+    <string name="common_error">Error</string>
+    <string name="cfg_device_id">Device ID: %1$s</string>
+    <string name="cfg_file_load_failed">Could not load the selected file: %1$s</string>
+    <string name="cfg_file_picker_failed">Could not open the file picker: %1$s</string>
+    <string name="cfg_download_failed">Download failed: %1$s</string>
+    <string name="cfg_pem_process_failed">Could not process the PEM data: %1$s</string>
+    <string name="cfg_btn_download">Download</string>
+    <string name="cfg_cert_status_expired">%1$s [EXPIRED]</string>
+    <string name="cfg_ca_status_default_named">%1$s (%2$s)</string>
+    <string name="cfg_cert_details">\n\nName: %1$s\nIssuer: %2$s\nValid until: %3$s</string>
+    <string name="cfg_cert_testing_tls_target">Testing TLS handshake… (%1$s)</string>
+    <string name="charge_completed_cost">Cost: %1$s (%2$s)</string>
+    <string name="chart_legend_item">● %1$s</string>
+    <string name="probe_reading_charging">Reading charging data…</string>
+    <string name="probe_reading_gps">Reading GPS…</string>
+    <string name="probe_reading_hvac">Reading HVAC…</string>
+    <string name="probe_reading_telemetry">Reading telemetry…</string>
+    <string name="probe_telemetry_results_header">TELEMETRY (responsive properties):\n\n</string>
+    <string name="probe_charging_results_header">CHARGING (read only):\n\n</string>
+    <string name="probe_location_results_header">LOCATION:\n\n</string>
+    <string name="update_handed_to_helper">Handed to the system helper</string>
+    <string name="update_downloading_short">Downloading</string>
+    <string name="update_installing_size">Installing (%1$d KB)</string>
+    <string name="update_error_https">Error: URL must use HTTPS</string>
+    <string name="update_already_applied">Already applied</string>
+    <string name="update_helper_unavailable">System helper unavailable — trying root</string>
+    <string name="update_error_http">Error: HTTP %1$d</string>
+    <string name="update_error_not_apk">Error: file is not an APK</string>
+    <string name="update_already_installed">Already installed (%1$s)</string>
+    <string name="update_ok">OK — updated</string>
+    <string name="update_error_detail">Error: %1$s</string>
+
+    <!-- Daily statistics is constructed in Java, so every visible heading and
+         sentence must still come through the same English resource bundle. -->
+    <string name="daily_stats_title">Daily Statistics</string>
+    <string name="daily_stats_period_day">Day</string>
+    <string name="daily_stats_period_week">Week</string>
+    <string name="daily_stats_period_month">Month</string>
+    <string name="daily_stats_sessions">Daily Sessions</string>
+    <string name="daily_stats_sessions_caption">Trips and charging sessions · newest first</string>
+    <string name="daily_stats_hourly_title">Distance by Hour &amp; Speed</string>
+    <string name="daily_stats_hourly_caption">Distance in km · colors by speed range</string>
+    <string name="daily_stats_no_journeys">No journeys recorded</string>
+    <string name="daily_stats_hour_of_day">Hour of day</string>
+    <string name="daily_stats_details_expired">Details unavailable — more than 90 days ago</string>
+    <string name="daily_stats_no_session_details">No session details for this day.</string>
+    <string name="daily_stats_no_sessions_period">No trips or charging sessions recorded in this period.</string>
+    <string name="daily_stats_no_sessions_date">No trips or charging sessions recorded on this date.</string>
+    <string name="daily_stats_consumption_title">Consumption &amp; Efficiency</string>
+    <string name="daily_stats_consumption_by_speed">Consumption by speed</string>
+    <string name="daily_stats_net">Net</string>
+    <string name="daily_stats_used">Used</string>
+    <string name="daily_stats_regen">Regen</string>
+    <string name="daily_stats_battery_title">Battery &amp; Charging</string>
+    <string name="daily_stats_soc_change">SoC Change</string>
+    <string name="daily_stats_energy_charged">Energy Charged</string>
+    <string name="daily_stats_charges">Charges</string>
+    <string name="daily_stats_outside_temp">Outside Temp.</string>
+    <string name="daily_stats_min_soc">Minimum SoC</string>
+    <string name="daily_stats_time_title">Time &amp; Speed</string>
+    <string name="daily_stats_total_distance">Total Distance</string>
+    <string name="daily_stats_time">Time</string>
+    <string name="daily_stats_avg_speed">Average Speed</string>
+    <string name="daily_stats_altitude_title">Altitude</string>
+    <string name="daily_stats_daily_change">Daily Change</string>
+    <string name="daily_stats_ascent">Ascent</string>
+    <string name="daily_stats_descent">Descent</string>
+    <string name="daily_stats_max_altitude">Maximum Altitude</string>
+    <string name="daily_stats_parked_duration">Parked %1$s</string>
+    <string name="daily_stats_valet_session">Valet mode  ·  %1$s</string>
+    <string name="daily_stats_valet_details">Max. %1$.0f km/h  ·  power %2$s  ·  battery %3$s</string>
+    <string name="daily_stats_cost_not_provided">Cost not provided</string>
+    <string name="daily_stats_session_summary">%1$s · %2$s</string>
+    <string name="daily_stats_session_summary_valet">%1$s · %2$s · %3$s</string>
+    <string name="unit_kmh" translatable="false">km/h</string>
+    <plurals name="daily_stats_trip_count">
+        <item quantity="one">%1$d trip</item>
+        <item quantity="other">%1$d trips</item>
+    </plurals>
+    <plurals name="daily_stats_charge_count">
+        <item quantity="one">%1$d charge</item>
+        <item quantity="other">%1$d charges</item>
+    </plurals>
+    <plurals name="daily_stats_valet_count">
+        <item quantity="one">%1$d valet</item>
+        <item quantity="other">%1$d valets</item>
+    </plurals>
 </resources>

@@ -135,7 +135,7 @@ public class Style {
         // face. Ignores the cabin light — if the car is violet, the app stays
         // amber — and ignores Appearance too, on purpose: it already IS a
         // night theme, so there is no light variant for it to switch to.
-        new Theme("noturno", "Noturno", R.string.theme_noturno_blurb,
+        new Theme("noturno", "Night", R.string.theme_noturno_blurb,
             new Palette(0xFF0B0B0D, 0xFF000000, 0xFF141416, 0xFF25252A, 0xFF7A4A08,
                 0xFFE4DCCB, 0xFF7E7568, 0xFFFFF3DF, 0xFFFFA726, 0xFF7FA8BF, 0xFFFFB74D,
                 22, 1, 0x1AFFFFFF, false, false, false, ART_VAPOR),

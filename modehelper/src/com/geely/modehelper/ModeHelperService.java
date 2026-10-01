@@ -503,16 +503,15 @@ public class ModeHelperService extends Service {
             String chn = "modehelper";
             android.app.NotificationManager nm =
                 (android.app.NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            // Portuguese strings: the head unit's locale is pt, and this app builds
-            // no resources (only manifest linked). Use hardcoded strings; for more
-            // than a few, convert to proper string resources instead.
+            // ModeHelper has no resource bundle (only a linked manifest), so keep
+            // its small, user-visible foreground notification explicitly English.
             if (android.os.Build.VERSION.SDK_INT >= 26) {
                 nm.createNotificationChannel(new android.app.NotificationChannel(
-                    chn, "Modo de condução", android.app.NotificationManager.IMPORTANCE_MIN));
+                    chn, "Driving mode", android.app.NotificationManager.IMPORTANCE_MIN));
             }
             android.app.Notification n = new android.app.Notification.Builder(this, chn)
-                .setContentTitle("Modo de condução")
-                .setContentText("Mantém seu modo e o Wi-Fi na carga")
+                .setContentTitle("Driving mode")
+                .setContentText("Keeps the selected mode and charging Wi-Fi active")
                 .setSmallIcon(android.R.drawable.ic_menu_preferences)
                 .build();
             startForeground(51, n);

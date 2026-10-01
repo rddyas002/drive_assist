@@ -1,5 +1,6 @@
 package com.geely.drivemem.ui;
 
+import com.geely.drivemem.R;
 import com.geely.drivemem.car.CarAccess;
 import com.geely.drivemem.car.CarActor;
 
@@ -41,7 +42,7 @@ public class HvacProbe extends Activity {
         out = new TextView(this);
         out.setTextSize(13);
         out.setPadding(24,24,24,24);
-        out.setText("Reading HVAC...");
+        out.setText(R.string.probe_reading_hvac);
         sv.addView(out);
         setContentView(sv);
 

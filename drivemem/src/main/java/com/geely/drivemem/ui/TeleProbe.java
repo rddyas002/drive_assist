@@ -1,5 +1,6 @@
 package com.geely.drivemem.ui;
 
+import com.geely.drivemem.R;
 import com.geely.drivemem.car.CarAccess;
 import com.geely.drivemem.car.CarActor;
 import com.geely.drivemem.car.Telemetry;
@@ -41,12 +42,12 @@ public class TeleProbe extends Activity {
         super.onCreate(b);
         ScrollView sv = new ScrollView(this);
         out = new TextView(this); out.setTextSize(13); out.setPadding(20,20,20,20);
-        out.setText("Reading telemetry..."); sv.addView(out); setContentView(sv);
+        out.setText(R.string.probe_reading_telemetry); sv.addView(out); setContentView(sv);
 
         CarActor.get(this).runOnCarThread(() -> {
             CarAccess car = CarActor.get(this).rawAccess();
             if (!car.isReady() && !car.connect(getApplicationContext())) { post("vehicle unavailable"); return; }
-            StringBuilder sb = new StringBuilder("TELEMETRIA (o que responde):\n\n");
+            StringBuilder sb = new StringBuilder(getString(R.string.probe_telemetry_results_header));
             for (Object[] p : P) {
                 int prop = (Integer) p[0]; String name = (String) p[1]; char t = (Character) p[2];
                 String got = null;

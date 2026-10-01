@@ -37,13 +37,13 @@
 
     <application
         android:name=".DriveMemApplication"
-        android:label="Drive Assist"
+        android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
         android:allowBackup="false">
 
         <activity android:name=".ui.ComfortActivity" android:exported="true"
-                  android:label="Drive Assist"
+                  android:label="@string/app_name"
                   android:launchMode="singleInstance"
                   android:taskAffinity="">
             <intent-filter>
@@ -52,7 +52,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.CleanupActivity" android:exported="false" android:label="Drive Assist — Limpeza" />
+        <activity android:name=".ui.CleanupActivity" android:exported="false"
+                  android:label="@string/activity_cleanup_label" />
         <activity android:name=".ui.ClipPlayerActivity" android:exported="false"
                   android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
         <activity android:name=".ui.TeleProbe" android:exported="false" />
@@ -110,6 +111,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.TelemetryActivity" android:exported="false"
-                  android:label="Drive Assist — Telemetria" />
+                  android:label="@string/activity_telemetry_label" />
     </application>
 </manifest>

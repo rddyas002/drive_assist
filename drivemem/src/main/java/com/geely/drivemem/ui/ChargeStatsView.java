@@ -592,7 +592,7 @@ public class ChargeStatsView extends LinearLayout {
 
     private View legend(Context c, String text, int color) {
         TextView v = new TextView(c);
-        v.setText("● " + text);
+        v.setText(getContext().getString(R.string.chart_legend_item, text));
         v.setTextColor(color);
         v.setTextSize(13);
         v.setPadding(Style.dp(c, 12), 0, 0, 0);

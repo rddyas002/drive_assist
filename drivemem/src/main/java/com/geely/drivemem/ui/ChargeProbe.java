@@ -1,5 +1,6 @@
 package com.geely.drivemem.ui;
 
+import com.geely.drivemem.R;
 import com.geely.drivemem.car.CarAccess;
 import com.geely.drivemem.car.CarActor;
 
@@ -18,10 +19,10 @@ public class ChargeProbe extends Activity {
     private TextView out;
 
     static final Object[][] P = {
-        {0x214020cd, "PHEV_MAC_CHRG_SOC_SET (limite %?)", 'i'},
+        {0x214020cd, "PHEV_MAC_CHRG_SOC_SET (limit %?)", 'i'},
         {0x2140b00b, "VCU_ALLOW_CHARGE_MAX_SOC_ACT", 'i'},
         {0x2140b00c, "VCU_ODO_ALLOW_CHARGE_MAX_SOC", 'i'},
-        {0x214020cc, "PHEV_CHRG_IMAX_LIMIT (corrente A?)", 'i'},
+        {0x214020cc, "PHEV_CHRG_IMAX_LIMIT (current A?)", 'i'},
         {0x214020c4, "PHEV_CHRG_DIS_MODE", 'i'},
         {0x214020b1, "PHEV_CHRG_DIS_SET", 'i'},
         {0x2140a156, "SOC_BALANCE_POINT_SETTING", 'i'},
@@ -29,7 +30,7 @@ public class ChargeProbe extends Activity {
         {0x2160b055, "DCHA_CHARGE_ACDC_CURRENT", 'f'},
         {0x2160b056, "DCHA_CHARGE_ACDC_VOLT", 'f'},
         {0x1160030c, "EV_BATTERY_INSTANT_CHARGE_RATE", 'f'},
-        {557885165, "BATTERY_PCT (atual)", 'f'},
+        {557885165, "BATTERY_PCT (current)", 'f'},
     };
     static final int[] AREAS = {0, 1};
 
@@ -37,11 +38,11 @@ public class ChargeProbe extends Activity {
         super.onCreate(b);
         ScrollView sv = new ScrollView(this);
         out = new TextView(this); out.setTextSize(14); out.setPadding(24,24,24,24);
-        out.setText("Reading charging data..."); sv.addView(out); setContentView(sv);
+        out.setText(R.string.probe_reading_charging); sv.addView(out); setContentView(sv);
         CarActor.get(this).runOnCarThread(() -> {
             CarAccess car = CarActor.get(this).rawAccess();
             if (!car.isReady() && !car.connect(getApplicationContext())) { post("vehicle unavailable"); return; }
-            StringBuilder sb = new StringBuilder("CARGA (so leitura):\n\n");
+            StringBuilder sb = new StringBuilder(getString(R.string.probe_charging_results_header));
             for (Object[] p : P) {
                 int prop = (Integer) p[0]; String name = (String) p[1]; char t = (Character) p[2];
                 String got = null;

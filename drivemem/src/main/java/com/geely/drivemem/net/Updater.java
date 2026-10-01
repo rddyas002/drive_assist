@@ -424,7 +424,10 @@ public class Updater {
                     u = Prefs.getUpdateUrl(ctx, DEFAULT_URL);
                     if (u.trim().isEmpty()) u = DEFAULT_URL;
                 }
-                if (!u.startsWith("https://")) { p.step("error: URL must use HTTPS"); return; }
+                if (!u.startsWith("https://")) {
+                    p.step(ctx.getString(com.geely.drivemem.R.string.update_error_https));
+                    return;
+                }
 
                 boolean force = url != null && url.toLowerCase(java.util.Locale.US).contains("force");
                 String blocked = installBlockedReason(force);
@@ -440,7 +443,8 @@ public class Updater {
                 // redelivered on every reconnect, so this check avoids repeated
                 // downloads/installs of the same APK.
                 if (u.equals(Prefs.getUpdateLastUrl(ctx))) {
-                    p.step("already applied"); return;
+                    p.step(ctx.getString(com.geely.drivemem.R.string.update_already_applied));
+                    return;
                 }
 
                 // Delegate to the helper if installed: modehelper runs as uid
@@ -454,21 +458,24 @@ public class Updater {
                     // Recorded BEFORE handing over, not after: a successful
                     // install kills this process mid-call.
                     Prefs.setUpdateLastUrl(ctx, u);
-                    p.step("entregue ao helper de sistema");
+                    p.step(ctx.getString(com.geely.drivemem.R.string.update_handed_to_helper));
                     Intent i = new Intent(HELPER_INSTALL).setPackage(HELPER_PKG);
                     i.putExtra("url", u);
                     ctx.sendBroadcast(i);
                     return;
                 }
-                p.step("helper unavailable — trying root");
+                p.step(ctx.getString(com.geely.drivemem.R.string.update_helper_unavailable));
 
-                p.step("baixando");
+                p.step(ctx.getString(com.geely.drivemem.R.string.update_downloading_short));
                 File out = new File(ctx.getCacheDir(), "update.apk");
                 HttpURLConnection c = (HttpURLConnection) new URL(u).openConnection();
                 c.setConnectTimeout(15000); c.setReadTimeout(30000);
                 c.setRequestProperty("User-Agent", "Drive Assist");
                 int code = c.getResponseCode();
-                if (code != 200) { p.step("error: HTTP " + code); return; }
+                if (code != 200) {
+                    p.step(ctx.getString(com.geely.drivemem.R.string.update_error_http, code));
+                    return;
+                }
                 long total = 0;
                 try (InputStream in = c.getInputStream(); FileOutputStream fo = new FileOutputStream(out)) {
                     byte[] buf = new byte[8192]; int n;
@@ -477,7 +484,10 @@ public class Updater {
                 // validate the PK "magic" (zip/apk) before trying to install
                 byte[] head = new byte[2];
                 try (FileInputStream fi = new FileInputStream(out)) { if (fi.read(head) < 2) head[0] = 0; }
-                if (head[0] != 'P' || head[1] != 'K') { p.step("error: file is not an APK"); return; }
+                if (head[0] != 'P' || head[1] != 'K') {
+                    p.step(ctx.getString(com.geely.drivemem.R.string.update_error_not_apk));
+                    return;
+                }
 
                 // Compare the downloaded APK's hash with the installed one to
                 // verify they are identical. This catches relabeled APKs and
@@ -486,20 +496,26 @@ public class Updater {
                 String got  = sha256(out);
                 if (mine != null && mine.equals(got)) {
                     Prefs.setUpdateLastUrl(ctx, u);
-                    p.step("already installed (" + got.substring(0, 8) + ")");
+                    p.step(ctx.getString(com.geely.drivemem.R.string.update_already_installed,
+                        got.substring(0, 8)));
                     return;
                 }
                 Log.i(TAG, "update: installed=" + mine + " downloaded=" + got);
 
-                p.step("instalando (" + (total / 1024) + " KB)");
+                p.step(ctx.getString(com.geely.drivemem.R.string.update_installing_size,
+                    total / 1024));
                 Process pr = Runtime.getRuntime().exec(new String[]{"su", "0", "pm", "install", "-r", out.getAbsolutePath()});
                 String res = readAll(pr.getInputStream()) + " " + readAll(pr.getErrorStream());
                 pr.waitFor();
                 Log.i(TAG, "update pm install: " + res);
                 boolean ok = res.toLowerCase().contains("success");
                 if (ok) Prefs.setUpdateLastUrl(ctx, u);
-                p.step(ok ? "OK — updated" : "error: " + res.trim());
-            } catch (Throwable t) { Log.w(TAG, "update error: " + t); p.step("error: " + t); }
+                p.step(ok ? ctx.getString(com.geely.drivemem.R.string.update_ok)
+                    : ctx.getString(com.geely.drivemem.R.string.update_error_detail, res.trim()));
+            } catch (Throwable t) {
+                Log.w(TAG, "update error: " + t);
+                p.step(ctx.getString(com.geely.drivemem.R.string.update_error_detail, t));
+            }
         }, "updater").start();
     }
 

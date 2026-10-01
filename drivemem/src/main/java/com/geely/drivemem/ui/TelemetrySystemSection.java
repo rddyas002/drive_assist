@@ -62,7 +62,8 @@ public final class TelemetrySystemSection extends LinearLayout {
         infoCard.addView(verView);
 
         TextView devIdView = new TextView(activity);
-        devIdView.setText("Device ID: " + com.geely.drivemem.net.MqttReporter.getDevId());
+        devIdView.setText(activity.getString(R.string.cfg_device_id,
+            com.geely.drivemem.net.MqttReporter.getDevId()));
         devIdView.setTextColor(Style.TEXT_DIM);
         devIdView.setTextSize(13);
         devIdView.setPadding(0, Style.dp(activity, 4), 0, 0);
