@@ -2,37 +2,28 @@ package com.geely.drivemem.ui;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.text.InputType;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.geely.drivemem.R;
-import com.geely.drivemem.net.Updater;
-import com.geely.drivemem.state.CarState;
 import com.geely.drivemem.util.Style;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.security.MessageDigest;
 
-/** System information and software updates panel of the Config screen. Application
- * version, APK SHA-256, OTA update URL, manual update check, and maintenance
- * operations (cleanup).
+/** System information and maintenance panel of the Config screen. Shows the
+ * application version and APK SHA-256, plus maintenance operations (cleanup).
  *
  * Extracted from TelemetryActivity.buildSystem() so that 2800+ line file
  * stops growing with every new Config section -- one View subclass per
  * section, same pattern ChargeStatsView/DailyStatsView already use. */
 public final class TelemetrySystemSection extends LinearLayout {
     private final Activity activity;
-    private final SharedPreferences prefs;
-    private final TextView status;
-    private EditText fUpdateUrl;
 
     public TelemetrySystemSection(Activity activity) {
         super(activity);
         this.activity = activity;
-        this.prefs = activity.getSharedPreferences("drivemem", Activity.MODE_PRIVATE);
         setOrientation(VERTICAL);
 
         addView(Style.header(activity, activity.getString(R.string.cfg_system_header)));
@@ -96,69 +87,11 @@ public final class TelemetrySystemSection extends LinearLayout {
         infoCard.addView(shaView);
 
         new Thread(() -> {
-            String sha = Updater.sha256(new File(activity.getPackageCodePath()));
+            String sha = sha256(new File(activity.getPackageCodePath()));
             activity.runOnUiThread(() -> shaView.setText(sha != null ? sha : "N/A"));
         }).start();
 
         addView(infoCard);
-
-        // ---- Software Update Card ----
-        addView(Style.header(activity, activity.getString(R.string.cfg_update_header)));
-        LinearLayout updateCard = new LinearLayout(activity);
-        updateCard.setOrientation(LinearLayout.VERTICAL);
-        updateCard.setBackground(Style.card(Style.CARD, activity));
-        updateCard.setPadding(pad, pad, pad, pad);
-
-        TextView urlLbl = Style.label(activity, activity.getString(R.string.cfg_update_url_label));
-        urlLbl.setTextSize(14);
-        urlLbl.setTextColor(Style.TEXT_DIM);
-        urlLbl.setPadding(0, 0, 0, Style.dp(activity, 4));
-        updateCard.addView(urlLbl);
-
-        fUpdateUrl = new EditText(activity);
-        fUpdateUrl.setText(prefs.getString("update_url", Updater.DEFAULT_URL));
-        fUpdateUrl.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
-        fUpdateUrl.setHint(Updater.DEFAULT_URL);
-        fUpdateUrl.setTextColor(Style.TEXT);
-        fUpdateUrl.setTextSize(15);
-        fUpdateUrl.setBackground(Style.card(Style.CARD_HI, activity));
-        fUpdateUrl.setPadding(pad, Style.dp(activity, 10), pad, Style.dp(activity, 10));
-        updateCard.addView(fUpdateUrl);
-
-        LinearLayout urlBtnRow = new LinearLayout(activity);
-        urlBtnRow.setOrientation(LinearLayout.HORIZONTAL);
-        urlBtnRow.addView(button(activity, activity.getString(R.string.cfg_btn_save), Style.ACCENT, () -> {
-            String u = fUpdateUrl.getText().toString().trim();
-            if (u.isEmpty()) { u = Updater.DEFAULT_URL; fUpdateUrl.setText(u); }
-            prefs.edit().putString("update_url", u).apply();
-            Toast.makeText(activity, activity.getString(R.string.cfg_saved), Toast.LENGTH_SHORT).show();
-        }));
-        urlBtnRow.addView(button(activity, activity.getString(R.string.cfg_btn_reset_default), 0xFF3A5A7A, () -> {
-            fUpdateUrl.setText(Updater.DEFAULT_URL);
-            prefs.edit().putString("update_url", Updater.DEFAULT_URL).apply();
-            Toast.makeText(activity, activity.getString(R.string.cfg_btn_reset_default), Toast.LENGTH_SHORT).show();
-        }));
-        updateCard.addView(urlBtnRow);
-
-        Style.gap(updateCard, activity, 14);
-
-        LinearLayout actRow = new LinearLayout(activity);
-        actRow.setOrientation(LinearLayout.HORIZONTAL);
-        actRow.addView(action(activity, activity.getString(R.string.cfg_btn_check_update), Style.ACCENT, () -> {
-            String u = fUpdateUrl.getText().toString().trim();
-            if (u.isEmpty()) { u = Updater.DEFAULT_URL; fUpdateUrl.setText(u); }
-            prefs.edit().putString("update_url", u).apply();
-            updateCheck();
-        }));
-        updateCard.addView(actRow);
-
-        status = new TextView(activity);
-        status.setTextColor(Style.TEXT_DIM);
-        status.setTextSize(13);
-        status.setPadding(0, Style.dp(activity, 10), 0, 0);
-        updateCard.addView(status);
-
-        addView(updateCard);
 
         // ---- Maintenance Card ----
         addView(Style.header(activity, activity.getString(R.string.cfg_maintenance_header)));
@@ -177,77 +110,22 @@ public final class TelemetrySystemSection extends LinearLayout {
         addView(maintCard);
     }
 
-    private void updateCheck() {
-        if (status != null) status.setText(activity.getString(R.string.update_checking));
-        Updater.check(activity.getApplicationContext(), null, new Updater.CheckCallback() {
-            @Override
-            public void onUpdateAvailable(Updater.UpdateInfo info) {
-                activity.runOnUiThread(() -> {
-                    if (status != null) status.setText("");
-                    if (!CarState.isParked()) {
-                        if (status != null) status.setText(activity.getString(R.string.update_not_parked));
-                        Toast.makeText(activity, activity.getString(R.string.update_not_parked), Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    UpdateDialog.show(activity, info, () -> {
-                        if (status != null) status.setText(activity.getString(R.string.update_downloading, info.versionName));
-                        Updater.update(activity.getApplicationContext(), info.apkUrl, s -> activity.runOnUiThread(() -> {
-                            if (status != null) status.setText(s);
-                        }));
-                    });
-                });
+    private static String sha256(File file) {
+        try (FileInputStream in = new FileInputStream(file)) {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] buffer = new byte[8192];
+            int count;
+            while ((count = in.read(buffer)) > 0) digest.update(buffer, 0, count);
+            char[] hex = "0123456789abcdef".toCharArray();
+            StringBuilder result = new StringBuilder(64);
+            for (byte value : digest.digest()) {
+                result.append(hex[(value >>> 4) & 0x0f]);
+                result.append(hex[value & 0x0f]);
             }
-
-            @Override
-            public void onAlreadyUpToDate(String currentVer) {
-                activity.runOnUiThread(() -> {
-                    if (status != null) status.setText(activity.getString(R.string.update_up_to_date, currentVer));
-                });
-            }
-
-            @Override
-            public void onError(String error) {
-                activity.runOnUiThread(() -> {
-                    if (status != null) status.setText(activity.getString(R.string.update_check_failed, error));
-                });
-            }
-        });
-        updateCheckHelper();
-    }
-
-    private void updateCheckHelper() {
-        String base = Updater.resolveUrl(activity.getApplicationContext(), null);
-        int slash = base.lastIndexOf('/');
-        if (slash < 0) return;
-        String helperUrl = base.substring(0, slash + 1) + "modehelper.apk";
-        Updater.check(activity.getApplicationContext(), helperUrl, Updater.HELPER_PKG, new Updater.CheckCallback() {
-            @Override
-            public void onUpdateAvailable(Updater.UpdateInfo info) {
-                activity.runOnUiThread(() -> {
-                    if (!CarState.isParked()) {
-                        return;
-                    }
-                    UpdateDialog.show(activity, info, () -> {
-                        Updater.updateHelper(activity.getApplicationContext(), info.apkUrl,
-                            s -> activity.runOnUiThread(() -> {}));
-                    });
-                });
-            }
-
-            @Override
-            public void onAlreadyUpToDate(String currentVer) {
-                activity.runOnUiThread(() -> {});
-            }
-
-            @Override
-            public void onError(String error) {
-                activity.runOnUiThread(() -> {
-                    if (error != null && error.contains("predates self-update")) {
-                        Toast.makeText(activity, error, Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
-        });
+            return result.toString();
+        } catch (Throwable ignored) {
+            return null;
+        }
     }
 
     private String wifiIpAddress(Activity activity) {
@@ -283,21 +161,4 @@ public final class TelemetrySystemSection extends LinearLayout {
         return t;
     }
 
-    private TextView action(Activity activity, String label, int color, Runnable onClick) {
-        TextView t = new TextView(activity);
-        t.setText(label);
-        t.setTextColor(Style.onFill(color));
-        t.setTextSize(18);
-        t.setTypeface(null, android.graphics.Typeface.BOLD);
-        t.setGravity(android.view.Gravity.CENTER);
-        t.setBackground(Style.card(color, activity));
-        int pv = Style.dp(activity, 16);
-        t.setPadding(pv, pv, pv, pv);
-        t.setOnClickListener(v -> onClick.run());
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, android.view.ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        int m = Style.dp(activity, 4);
-        lp.setMargins(m, Style.dp(activity, 8), m, 0);
-        t.setLayoutParams(lp);
-        return t;
-    }
 }

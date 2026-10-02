@@ -7,7 +7,6 @@ import android.provider.Settings;
 import android.util.Log;
 
 import com.geely.drivemem.car.CarAccess;
-import com.geely.drivemem.net.Updater;
 import com.geely.drivemem.util.Prefs;
 
 /** Controls ADB state through the privileged modehelper.
@@ -18,7 +17,7 @@ import com.geely.drivemem.util.Prefs;
  * actual ADB state, not cached requests.
  */
 public final class AdbGate {
-    static final String HELPER_PKG = Updater.HELPER_PKG;
+    static final String HELPER_PKG = "com.geely.modehelper";
     static final String HELPER_SET = "com.geely.modehelper.SET_ADB";
     static final String HELPER_SET_TRUSTED = "com.geely.modehelper.SET_TRUSTED_WIFI";
 

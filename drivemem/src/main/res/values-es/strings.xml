@@ -110,7 +110,6 @@
     <string name="cfg_btn_on">Encender</string>
     <string name="cfg_btn_off">Apagar</string>
     <string name="cfg_btn_test">Probar</string>
-    <string name="cfg_btn_update">Actualizar</string>
     <string name="cfg_testing">Probando…</string>
     <string name="cfg_cleanup">Limpieza y eliminación…</string>
     <string name="cfg_drive_header">Modo de conducción</string>
@@ -289,9 +288,6 @@
     <string name="cfg_version_label">Versión: %1$s (compilación %2$d)</string>
     <string name="cfg_ip_label">Dirección IP Wi-Fi: %1$s</string>
     <string name="cfg_sha_label">SHA-256 del APK</string>
-    <string name="cfg_update_header">Actualización de software</string>
-    <string name="cfg_update_url_label">URL de actualización (HTTPS)</string>
-    <string name="cfg_btn_check_update">Buscar e instalar actualización</string>
     <!-- touch & maintenance -->
     <string name="cfg_maintenance_header">Mantenimiento</string>
     <!-- mqtt & telemetry -->
@@ -414,21 +410,6 @@
     <string name="charge_balance_spent">Consumo</string>
     <string name="charge_balance_regen">Regeneración</string>
     <!-- software update dialog -->
-    <string name="update_dialog_title">Actualización de software disponible</string>
-    <string name="update_dialog_title_target">Actualización %1$s disponible</string>
-    <string name="update_dialog_version_comp">Versión: %1$s   →   %2$s</string>
-    <string name="update_dialog_current_ver">Versión actual: %1$s</string>
-    <string name="update_dialog_new_ver">Nueva versión: %1$s</string>
-    <string name="update_dialog_changelog_header">Novedades:</string>
-    <string name="update_dialog_accept">Aceptar y actualizar</string>
-    <string name="update_dialog_decline">Más tarde</string>
-    <string name="update_dialog_skip">Omitir esta versión</string>
-    <string name="update_checking">Buscando actualizaciones…</string>
-    <string name="update_up_to_date">Drive Assist está actualizado (%1$s)</string>
-    <string name="update_check_failed">No se pudieron comprobar las actualizaciones: %1$s</string>
-    <string name="update_downloading">Descargando actualización (%1$s) …</string>
-    <string name="update_installing">Transfiriendo a ModeHelper para la instalación…</string>
-    <string name="update_not_parked">Las actualizaciones solo se pueden revisar e instalar con el vehículo estacionado.</string>
 
     <!-- daily stats day navigator -->
     <string name="daily_stats_prev_day">Anterior</string>
@@ -456,17 +437,6 @@
     <string name="probe_telemetry_results_header">TELEMETRY (responsive properties):\n\n</string>
     <string name="probe_charging_results_header">CHARGING (read only):\n\n</string>
     <string name="probe_location_results_header">LOCATION:\n\n</string>
-    <string name="update_handed_to_helper">Handed to the system helper</string>
-    <string name="update_downloading_short">Downloading</string>
-    <string name="update_installing_size">Installing (%1$d KB)</string>
-    <string name="update_error_https">Error: URL must use HTTPS</string>
-    <string name="update_already_applied">Already applied</string>
-    <string name="update_helper_unavailable">System helper unavailable — trying root</string>
-    <string name="update_error_http">Error: HTTP %1$d</string>
-    <string name="update_error_not_apk">Error: file is not an APK</string>
-    <string name="update_already_installed">Already installed (%1$s)</string>
-    <string name="update_ok">OK — updated</string>
-    <string name="update_error_detail">Error: %1$s</string>
     <string name="daily_stats_title">Daily Statistics</string>
     <string name="daily_stats_period_day">Day</string>
     <string name="daily_stats_period_week">Week</string>

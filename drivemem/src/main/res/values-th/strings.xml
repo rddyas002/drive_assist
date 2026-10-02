@@ -91,9 +91,6 @@
     <string name="cfg_version_label">เวอร์ชัน: %1$s (บิลด์ %2$d)</string>
     <string name="cfg_sha_label">APK SHA-256</string>
     <string name="cfg_ip_label">ที่อยู่ IP Wi-Fi: %1$s</string>
-    <string name="cfg_update_header">อัปเดตซอฟต์แวร์</string>
-    <string name="cfg_update_url_label">URL การอัปเดต (HTTPS)</string>
-    <string name="cfg_btn_check_update">ตรวจสอบและติดตั้งการอัปเดต</string>
     <string name="cfg_maintenance_header">การบำรุงรักษา</string>
     <string name="cfg_mqtt_header">การส่งไปยัง Home Assistant</string>
     <string name="cfg_mqtt_enable_label">เปิดใช้งานการวัดระยะไกล MQTT</string>
@@ -203,7 +200,6 @@
     <string name="cfg_btn_off">ปิด</string>
     <string name="cfg_btn_test">ทดสอบ</string>
     <string name="cfg_btn_discovery">ส่งข้อมูลค้นหา MQTT</string>
-    <string name="cfg_btn_update">อัปเดต</string>
     <string name="cfg_btn_save">บันทึก</string>
     <string name="cfg_testing">กำลังทดสอบ...</string>
     <string name="cfg_discovery_sending">กำลังส่งข้อมูลค้นหา MQTT…</string>
@@ -434,21 +430,6 @@
     <string name="charge_balance_regen">คืนพลังงาน</string>
 
     <!-- software update dialog & prompt -->
-    <string name="update_dialog_title">มีการอัปเดตซอฟต์แวร์</string>
-    <string name="update_dialog_title_target">มีการอัปเดต %1$s</string>
-    <string name="update_dialog_version_comp">เวอร์ชัน: %1$s   ➔   %2$s</string>
-    <string name="update_dialog_current_ver">เวอร์ชันปัจจุบัน: %1$s</string>
-    <string name="update_dialog_new_ver">เวอร์ชันใหม่: %1$s</string>
-    <string name="update_dialog_changelog_header">มีอะไรใหม่:</string>
-    <string name="update_dialog_accept">ยอมรับและอัปเดต</string>
-    <string name="update_dialog_decline">ไว้ภายหลัง</string>
-    <string name="update_dialog_skip">ข้ามเวอร์ชันนี้</string>
-    <string name="update_checking">กำลังตรวจสอบการอัปเดต…</string>
-    <string name="update_up_to_date">Drive Assist เป็นเวอร์ชันล่าสุดแล้ว (%1$s)</string>
-    <string name="update_check_failed">ไม่สามารถตรวจสอบการอัปเดตได้: %1$s</string>
-    <string name="update_downloading">กำลังดาวน์โหลดการอัปเดต (%1$s) …</string>
-    <string name="update_installing">กำลังส่งต่อไปยัง ModeHelper เพื่อติดตั้ง…</string>
-    <string name="update_not_parked">สามารถตรวจสอบและติดตั้งการอัปเดตได้เฉพาะขณะจอดรถเท่านั้น</string>
     <!-- English-only production UI added during the final language sweep. -->
     <string name="activity_cleanup_label">Drive Assist — Cleanup</string>
     <string name="activity_telemetry_label">Drive Assist — Telemetry</string>
@@ -472,17 +453,6 @@
     <string name="probe_telemetry_results_header">TELEMETRY (responsive properties):\n\n</string>
     <string name="probe_charging_results_header">CHARGING (read only):\n\n</string>
     <string name="probe_location_results_header">LOCATION:\n\n</string>
-    <string name="update_handed_to_helper">Handed to the system helper</string>
-    <string name="update_downloading_short">Downloading</string>
-    <string name="update_installing_size">Installing (%1$d KB)</string>
-    <string name="update_error_https">Error: URL must use HTTPS</string>
-    <string name="update_already_applied">Already applied</string>
-    <string name="update_helper_unavailable">System helper unavailable — trying root</string>
-    <string name="update_error_http">Error: HTTP %1$d</string>
-    <string name="update_error_not_apk">Error: file is not an APK</string>
-    <string name="update_already_installed">Already installed (%1$s)</string>
-    <string name="update_ok">OK — updated</string>
-    <string name="update_error_detail">Error: %1$s</string>
     <string name="daily_stats_title">Daily Statistics</string>
     <string name="daily_stats_period_day">Day</string>
     <string name="daily_stats_period_week">Week</string>

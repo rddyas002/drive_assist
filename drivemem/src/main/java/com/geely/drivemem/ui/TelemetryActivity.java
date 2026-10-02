@@ -17,7 +17,6 @@ import com.geely.drivemem.net.AbrpUploader;
 import com.geely.drivemem.net.CertImporter;
 import com.geely.drivemem.net.MqttReporter;
 import com.geely.drivemem.net.MqttTls;
-import com.geely.drivemem.net.Updater;
 import com.geely.drivemem.sensors.Obd2Reader;
 import com.geely.drivemem.services.OutTempService;
 import com.geely.drivemem.services.SocIconService;
@@ -380,22 +379,6 @@ public class TelemetryActivity extends Activity {
         t.setText(text);
         return t;
     }
-
-    // =====================================================================
-    // MQTT panel (extracted to TelemetryMqttSection)
-    // =====================================================================
-    // Same Updater the MQTT command uses, so it inherits the same locks: https
-    // only, signature must match, and the helper does the install. Progress lands
-    // in the status line because there is no other place to watch it from the
-    // driver's seat — and there will be no success message, since a successful
-    // install kills this process.
-    // logMqtt stub: MQTT logging moved to TelemetryMqttSection, but updateCheck()
-    // and updateCheckHelper() in TelemetrySystemSection still call this; we keep it as a no-op.
-    private void logMqtt(String tag, String msg) {
-        // No-op: MQTT-specific logging is now handled by TelemetryMqttSection.
-        // System logging (updateCheck, updateCheckHelper) simply doesn't log to MQTT log.
-    }
-
 
     private LinearLayout toggleRow(String label, boolean on, GeelySwitch.OnToggle cb) {
         LinearLayout row = new LinearLayout(this);

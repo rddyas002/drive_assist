@@ -34,14 +34,10 @@ import com.geely.drivemem.util.LayoutWait;
 import com.geely.drivemem.util.Modes;
 import com.geely.drivemem.util.Prefs;
 import com.geely.drivemem.util.SpotifyClient;
-import com.geely.drivemem.net.Updater;
 import com.geely.drivemem.util.Style;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1710,36 +1706,7 @@ public class ComfortActivity extends Activity {
     private final EntityBus.Listener chargeBusListener = (key, reading) -> ui.post(this::checkRetainedCharge);
     private final EntityBus.Listener journeyBusListener = (key, reading) -> ui.post(this::refreshJourneyCard);
 
-    private Updater.UpdateInfo pendingUpdate = null;
-    private android.app.AlertDialog activeUpdateDialog = null;
     private android.app.AlertDialog activeCostDialog = null;
-
-    private void promptUpdateIfParked(Updater.UpdateInfo info) {
-        if (info == null) return;
-        pendingUpdate = info;
-
-        // VEHICLE SAFETY: strictly forbid popups while car is in motion or not in Park (P)
-        if (!CarState.isParked()) {
-            android.util.Log.i("ComfortActivity", "Update (" + info.versionName + ") deferred: vehicle is driving / not in park.");
-            return;
-        }
-
-        if (activeUpdateDialog != null && activeUpdateDialog.isShowing()) return;
-
-        activeUpdateDialog = UpdateDialog.show(this, info, () -> {
-            pendingUpdate = null;
-            activeUpdateDialog = null;
-            Updater.Progress step = s -> android.util.Log.i("ComfortActivity", "Update step: " + s);
-            // Rule: always install via updateHelper(), which updates drivemem and modehelper together.
-            // Invariant: prevents consecutive update prompts for co-versioned companion packages.
-            // See docs/incidents.md#2026-09-21-double-update-prompt
-            Updater.updateHelper(getApplicationContext(), info.apkUrl, step);
-        }, () -> {
-            // Driver declined/dismissed
-            pendingUpdate = null;
-            activeUpdateDialog = null;
-        });
-    }
 
     // Turbo only means anything while driving; Charging only while parked —
     // re-derive both from their own current state whenever gear changes,
@@ -1775,19 +1742,10 @@ public class ComfortActivity extends Activity {
                 skylineSeedAtBuild = newSeed;   // this IS the change; onResume must not re-recreate for it
                 ((com.geely.drivemem.art.SkylineArtView) art).reroll(newSeed);
             }
-            // DRIVING SAFETY: immediately dismiss any active dialogs if vehicle leaves Park!
-            if (activeUpdateDialog != null && activeUpdateDialog.isShowing()) {
-                try { activeUpdateDialog.dismiss(); } catch (Throwable ignored) {}
-                activeUpdateDialog = null;
-            }
+            // DRIVING SAFETY: immediately dismiss active dialogs if vehicle leaves Park.
             if (activeCostDialog != null && activeCostDialog.isShowing()) {
                 try { activeCostDialog.dismiss(); } catch (Throwable ignored) {}
                 activeCostDialog = null;
-            }
-        } else {
-            // SAFELY PARKED: present pending update if one was deferred while driving
-            if (pendingUpdate != null && (activeUpdateDialog == null || !activeUpdateDialog.isShowing())) {
-                promptUpdateIfParked(pendingUpdate);
             }
         }
     });
@@ -2200,32 +2158,7 @@ public class ComfortActivity extends Activity {
         // happens if this stops polling while the screen is off, unlike
         // abandoning a countdown mid-boost.
         SpotifyClient.startPolling(this);
-        try {
-            registerReceiver(updateReceiver, new IntentFilter(Updater.ACTION_UPDATE_AVAILABLE));
-        } catch (Throwable ignored) {}
-        Updater.autoCheckIfDue(this);
-        if (CarState.isParked() && pendingUpdate != null && (activeUpdateDialog == null || !activeUpdateDialog.isShowing())) {
-            promptUpdateIfParked(pendingUpdate);
-        }
     }
-
-    private final BroadcastReceiver updateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent == null || !Updater.ACTION_UPDATE_AVAILABLE.equals(intent.getAction())) return;
-            String vn = intent.getStringExtra("versionName");
-            int vc = intent.getIntExtra("versionCode", 0);
-            String cl = intent.getStringExtra("changelog");
-            String url = intent.getStringExtra("url");
-            // Present only for a non-self update (e.g. modehelper) — see
-            // MqttReporter.doCmdUpdateHelper(). Absent extras fall through
-            // to the two nulls UpdateInfo's short constructor already uses,
-            // so this app's own update prompt is unchanged.
-            String targetLabel = intent.getStringExtra("targetLabel");
-            String currentVersionName = intent.getStringExtra("currentVersionName");
-            promptUpdateIfParked(new Updater.UpdateInfo(vn, vc, cl, url, targetLabel, currentVersionName));
-        }
-    };
 
     @Override protected void onPause() {
         super.onPause();
@@ -2235,11 +2168,6 @@ public class ComfortActivity extends Activity {
         EntityBus.unsubscribe("valet.changed", journeyBusListener);
         EntityBus.unsubscribe("valet.progress", journeyBusListener);
         EntityBus.unsubscribe("parking.changed", journeyBusListener);
-        try { unregisterReceiver(updateReceiver); } catch (Throwable ignored) {}
-        if (activeUpdateDialog != null && activeUpdateDialog.isShowing()) {
-            try { activeUpdateDialog.dismiss(); } catch (Throwable ignored) {}
-            activeUpdateDialog = null;
-        }
         if (activeCostDialog != null && activeCostDialog.isShowing()) {
             try { activeCostDialog.dismiss(); } catch (Throwable ignored) {}
             activeCostDialog = null;

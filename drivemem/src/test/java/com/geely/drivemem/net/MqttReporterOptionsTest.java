@@ -4,6 +4,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 
 public class MqttReporterOptionsTest {
@@ -21,5 +22,12 @@ public class MqttReporterOptionsTest {
     @Test public void lanFailsFastRemoteGetsLonger() {
         assertEquals(4, MqttReporter.connectOptions("tcp://lan-broker:1883", null, null).getConnectionTimeout());
         assertEquals(10, MqttReporter.connectOptions("wss://broker.example:443/mqtt", null, null).getConnectionTimeout());
+    }
+
+    @Test public void obsoleteUpdateEntitiesAreRemovedFromDiscovery() {
+        assertArrayEquals(new String[]{
+            "homeassistant/button/test-device/update/config",
+            "homeassistant/sensor/test-device/update_state/config"
+        }, MqttReporter.retiredUpdateDiscoveryTopics("test-device"));
     }
 }

@@ -143,22 +143,6 @@ public final class Prefs {
     public static String getTheme(Context ctx, String def) { return file(ctx).getString("theme", def); }
     public static void setTheme(Context ctx, String v) { file(ctx).edit().putString("theme", v).apply(); }
 
-    // --- Auto update check throttle ---
-    public static long getAutoUpdateLastCheckMs(Context ctx) { return file(ctx).getLong("auto_update_last_check_ms", 0); }
-    public static void setAutoUpdateLastCheckMs(Context ctx, long v) { file(ctx).edit().putLong("auto_update_last_check_ms", v).apply(); }
-
-    // --- Updates ---
-    public static String getUpdateUrl(Context ctx, String def) { return file(ctx).getString("update_url", def); }
-    public static void setUpdateUrl(Context ctx, String v) { file(ctx).edit().putString("update_url", v).apply(); }
-    public static String getUpdateLastUrl(Context ctx) { return file(ctx).getString("update_last_url", ""); }
-    public static void setUpdateLastUrl(Context ctx, String v) { file(ctx).edit().putString("update_last_url", v).apply(); }
-    public static int getSkipUpdateVc(Context ctx, boolean modehelper) {
-        return file(ctx).getInt(modehelper ? "skip_update_vc_modehelper" : "skip_update_vc", 0);
-    }
-    public static void setSkipUpdateVc(Context ctx, boolean modehelper, int versionCode) {
-        file(ctx).edit().putInt(modehelper ? "skip_update_vc_modehelper" : "skip_update_vc", versionCode).apply();
-    }
-
     // --- One-time migration/rollup guards ---
     public static boolean getDbMigratedV1(Context ctx) { return file(ctx).getBoolean("db_migrated_v1", false); }
     public static void setDbMigratedV1(Context ctx) { file(ctx).edit().putBoolean("db_migrated_v1", true).apply(); }

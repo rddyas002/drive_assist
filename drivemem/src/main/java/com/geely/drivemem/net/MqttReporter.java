@@ -16,7 +16,6 @@ import com.geely.drivemem.util.Beat;
 import com.geely.drivemem.util.SpotifyClient;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -149,22 +148,8 @@ public class MqttReporter {
     static final String PARK_STATE_TOPIC       = BASE_TOPIC + "/park/state";
     static final String PARK_TIMER_CMD_TOPIC   = BASE_TOPIC + "/park_timer/set";
     static final String PARK_TIMER_STATE_TOPIC = BASE_TOPIC + "/park_timer/state";
-    // auto-update: HA presses the button -> Drive Assist downloads the apk from /local
-    // and installs it (root)
-    static final String UPDATE_CMD_TOPIC   = BASE_TOPIC + "/update/set";
-    static final String UPDATE_STATE_TOPIC = BASE_TOPIC + "/update/state";
-    // Same idea, for modehelper's own OTA (see Updater.check/update's
-    // targetPkg parameter and Installer.java's ALLOWED_PKGS) — a second,
-    // parallel topic rather than overloading the one above, so a plain HA
-    // automation publishing the drivemem URL can never accidentally target
-    // the privileged helper instead.
-    static final String UPDATE_HELPER_CMD_TOPIC   = BASE_TOPIC + "/update/modehelper/set";
-    static final String UPDATE_HELPER_STATE_TOPIC = BASE_TOPIC + "/update/modehelper/state";
-    // WHICH BUILD IS ACTUALLY IN THE CAR. Updater cannot report its own success —
-    // a successful install kills the process that would send the message — so the
-    // only evidence used to be the car coming back `online`, which cannot tell a
-    // new build from the old one restarting. This can. RETAINED, so the question
-    // is answerable while the car is asleep instead of only on a telemetry tick.
+    // Reports which build is installed. This is local package metadata only; it
+    // does not contact an update server or offer installation.
     static final String VERSION_TOPIC = BASE_TOPIC + "/version";
     // REVERSE CONTROL: the broker presses things inside the app. Rides the same
     // commandsEnabled lock as charge/light/park — one switch, already on the
@@ -205,13 +190,11 @@ public class MqttReporter {
     private static final int MSG_CMD_PARK       = 9;   // no
     private static final int MSG_CMD_PARK_TIMER = 10;  // no
     private static final int MSG_PARK_SYNC      = 11;  // coalesce (re-reads state)
-    private static final int MSG_CMD_UPDATE     = 12;  // no
     private static final int MSG_CMD_ACTION     = 15;  // no
     private static final int MSG_CMD_ADB        = 16;  // no
     private static final int MSG_GATE_STATE     = 17;  // coalesce
     // 18/19/20 (MSG_MEDIA_*) freed — the Music card talks to Spotify's Web
     // API directly now, not through HA/MQTT. See SpotifyClient.
-    private static final int MSG_CMD_UPDATE_HELPER = 21;  // no — modehelper's own OTA, see UPDATE_HELPER_CMD_TOPIC
 
     private final String uri, user, pass;
     private final String clientId;
@@ -473,8 +456,6 @@ public class MqttReporter {
                 case MSG_CMD_PARK:       doCmdPark((String) m.obj); break;
                 case MSG_CMD_PARK_TIMER: doCmdParkTimer((String) m.obj); break;
                 case MSG_PARK_SYNC:      doPublishParkState(); break;
-                case MSG_CMD_UPDATE:     doCmdUpdate((String) m.obj); break;
-                case MSG_CMD_UPDATE_HELPER: doCmdUpdateHelper((String) m.obj); break;
                 case MSG_CMD_ACTION:     doCmdAction((String) m.obj); break;
                 case MSG_CMD_ADB:        doCmdAdb((String) m.obj); break;
                 case MSG_CLOSE:       doClose(); break;
@@ -722,8 +703,8 @@ public class MqttReporter {
             if (on) { subscribeCommands(); }
             else {
                 for (String t : new String[]{CHARGE_CMD_TOPIC, CHARGE_SW_CMD_TOPIC, LIGHT_CMD_TOPIC,
-                                             PARK_CMD_TOPIC, PARK_TIMER_CMD_TOPIC, UPDATE_CMD_TOPIC,
-                                             UPDATE_HELPER_CMD_TOPIC, ACTION_CMD_TOPIC, ADB_CMD_TOPIC}) {
+                                             PARK_CMD_TOPIC, PARK_TIMER_CMD_TOPIC,
+                                             ACTION_CMD_TOPIC, ADB_CMD_TOPIC}) {
                     try { client.unsubscribe(t); } catch (Throwable ignored) {}
                 }
                 Log.i(TAG, "commands OFF — unsubscribed from every topic");
@@ -753,14 +734,6 @@ public class MqttReporter {
             client.subscribe(PARK_TIMER_CMD_TOPIC, 1, (IMqttMessageListener) (topic, msg) ->
                 h.obtainMessage(MSG_CMD_PARK_TIMER, new String(msg.getPayload()).trim()).sendToTarget());
             Log.i(TAG, "subscribed to " + PARK_CMD_TOPIC + " e " + PARK_TIMER_CMD_TOPIC);
-
-            client.subscribe(UPDATE_CMD_TOPIC, 1, (IMqttMessageListener) (topic, msg) ->
-                h.obtainMessage(MSG_CMD_UPDATE, new String(msg.getPayload()).trim()).sendToTarget());
-            Log.i(TAG, "subscribed to " + UPDATE_CMD_TOPIC);
-
-            client.subscribe(UPDATE_HELPER_CMD_TOPIC, 1, (IMqttMessageListener) (topic, msg) ->
-                h.obtainMessage(MSG_CMD_UPDATE_HELPER, new String(msg.getPayload()).trim()).sendToTarget());
-            Log.i(TAG, "subscribed to " + UPDATE_HELPER_CMD_TOPIC);
 
             client.subscribe(ACTION_CMD_TOPIC, 1, (IMqttMessageListener) (topic, msg) ->
                 h.obtainMessage(MSG_CMD_ACTION, new String(msg.getPayload()).trim()).sendToTarget());
@@ -968,86 +941,6 @@ public class MqttReporter {
     private void publishAdbState() {
         if (ctx == null) return;
         pub(ADB_STATE_TOPIC, AdbGate.isEnabled(ctx) ? "ON" : "OFF", true);
-    }
-
-    private void doCmdUpdate(String body) {
-        if (cmdBlocked("update")) return;
-        if (ctx == null) { Log.w(TAG, "update: no Context"); return; }
-        Log.i(TAG, "CMD update from HA: " + body);
-
-        if (body != null && body.toLowerCase(java.util.Locale.US).contains("force")) {
-            pub(UPDATE_STATE_TOPIC, "starting (forced)", false);
-            Updater.update(ctx, body, s -> pub(UPDATE_STATE_TOPIC, s, false));
-            return;
-        }
-
-        pub(UPDATE_STATE_TOPIC, "checking", false);
-        Updater.check(ctx, body, new Updater.CheckCallback() {
-            @Override
-            public void onUpdateAvailable(Updater.UpdateInfo info) {
-                pub(UPDATE_STATE_TOPIC, "available: " + info.versionName, false);
-                Intent it = new Intent(Updater.ACTION_UPDATE_AVAILABLE);
-                it.putExtra("versionName", info.versionName);
-                it.putExtra("versionCode", info.versionCode);
-                it.putExtra("changelog", info.changelog);
-                it.putExtra("url", info.apkUrl);
-                ctx.sendBroadcast(it);
-            }
-
-            @Override
-            public void onAlreadyUpToDate(String currentVer) {
-                pub(UPDATE_STATE_TOPIC, "up to date (" + currentVer + ")", false);
-            }
-
-            @Override
-            public void onError(String error) {
-                pub(UPDATE_STATE_TOPIC, "error: " + error, false);
-            }
-        });
-    }
-
-    // Same shape as doCmdUpdate(), for modehelper's own OTA — see
-    // Updater.check()'s targetPkg parameter and Installer.java's
-    // ALLOWED_PKGS. Updater.update() itself needs no target-awareness: it
-    // only ever hands a URL to modehelper, which decides what it's an
-    // update FOR from the downloaded APK's own declared package.
-    private void doCmdUpdateHelper(String body) {
-        if (cmdBlocked("update")) return;
-        if (ctx == null) { Log.w(TAG, "update: no Context"); return; }
-        Log.i(TAG, "CMD update (modehelper) from HA: " + body);
-
-        if (body != null && body.toLowerCase(java.util.Locale.US).contains("force")) {
-            pub(UPDATE_HELPER_STATE_TOPIC, "starting (forced)", false);
-            Updater.updateHelper(ctx, body, s -> pub(UPDATE_HELPER_STATE_TOPIC, s, false));
-            return;
-        }
-
-        pub(UPDATE_HELPER_STATE_TOPIC, "checking", false);
-        Updater.check(ctx, body, Updater.HELPER_PKG, new Updater.CheckCallback() {
-            @Override
-            public void onUpdateAvailable(Updater.UpdateInfo info) {
-                pub(UPDATE_HELPER_STATE_TOPIC, "available: " + info.versionName, false);
-                Intent it = new Intent(Updater.ACTION_UPDATE_AVAILABLE);
-                it.putExtra("versionName", info.versionName);
-                it.putExtra("versionCode", info.versionCode);
-                it.putExtra("changelog", info.changelog);
-                it.putExtra("url", info.apkUrl);
-                it.putExtra("target", "modehelper");
-                it.putExtra("targetLabel", info.targetLabel);
-                it.putExtra("currentVersionName", info.currentVersionName);
-                ctx.sendBroadcast(it);
-            }
-
-            @Override
-            public void onAlreadyUpToDate(String currentVer) {
-                pub(UPDATE_HELPER_STATE_TOPIC, "up to date (" + currentVer + ")", false);
-            }
-
-            @Override
-            public void onError(String error) {
-                pub(UPDATE_HELPER_STATE_TOPIC, "error: " + error, false);
-            }
-        });
     }
 
     // REVERSE CONTROL. Payloads: cool | warm | cool:3 | warm:2 | screen
@@ -1388,7 +1281,7 @@ public class MqttReporter {
         sendPlugDiscovery();
         sendLightDiscovery();
         sendParkDiscovery();
-        sendUpdateDiscovery();
+        sendVersionAndAdbDiscovery();
         sendTrackerDiscovery();
         sendEnergyDiscovery();
         discoverySent = true;
@@ -1399,8 +1292,8 @@ public class MqttReporter {
     // .read()), so the FIELDS-driven discovery loop above never created entities
     // for them; the values sat in STATE_TOPIC's JSON unused by HA. json_attr_t
     // pointing at the SAME topic (no separate template) makes HA expose every
-    // key in that payload as an attribute, same as sendUpdateDiscovery's own
-    // version sensor does -- so energy_quality (measured/estimated/no_data,
+    // key in that payload as an attribute, same as the version sensor does --
+    // so energy_quality (measured/estimated/no_data,
     // this window's twin of the app's own "~" mark) rides along automatically,
     // without a second publish or a second topic to keep in sync.
     private void sendEnergyDiscovery() {
@@ -1451,10 +1344,9 @@ public class MqttReporter {
         pub("homeassistant/select/" + DEV_ID + "/park_timer/config", sel, true);
     }
 
-    // versionName is human ("20260808-1421"), versionCode is the monotonic one
-    // build.sh injects (minutes since the epoch) and is what actually decides
-    // whether an install is a downgrade. Both, because the first is readable and
-    // the second is the one that can be COMPARED against what was pushed.
+    // versionName is human ("20260808-1421"); versionCode is the monotonic value
+    // build.sh injects. Reporting both identifies the installed build without
+    // contacting any update service.
     private String versionJson() {
         String name = "?"; long code = -1;
         try {
@@ -1466,26 +1358,11 @@ public class MqttReporter {
         return "{\"name\":\"" + name + "\",\"code\":" + code + "}";
     }
 
-    // "Update Drive Assist" button + update status sensor
-    private void sendUpdateDiscovery() {
+    private void sendVersionAndAdbDiscovery() {
         String dev = getDeviceJson();
-        String btn = "{"
-            + "\"name\":\"Update Drive Assist\","
-            + "\"uniq_id\":\"" + DEV_ID + "_update\","
-            + "\"cmd_t\":\"" + UPDATE_CMD_TOPIC + "\","
-            + "\"payload_press\":\"go\","
-            + "\"avty_t\":\"" + AVAIL_TOPIC + "\","
-            + "\"ic\":\"mdi:download\"," + dev
-            + "}";
-        pub("homeassistant/button/" + DEV_ID + "/update/config", btn, true);
-        String sen = "{"
-            + "\"name\":\"Drive Assist Update\","
-            + "\"uniq_id\":\"" + DEV_ID + "_update_state\","
-            + "\"stat_t\":\"" + UPDATE_STATE_TOPIC + "\","
-            + "\"avty_t\":\"" + AVAIL_TOPIC + "\","
-            + "\"ic\":\"mdi:sync\"," + dev
-            + "}";
-        pub("homeassistant/sensor/" + DEV_ID + "/update_state/config", sen, true);
+        // Delete retained discovery left by older releases so Home Assistant
+        // removes both update controls without requiring manual entity cleanup.
+        for (String topic : retiredUpdateDiscoveryTopics(DEV_ID)) pub(topic, "", true);
         // No avty_t on purpose: the whole value of this sensor is being readable
         // while the car is asleep, which is exactly when HA would grey out an
         // availability-gated entity.
@@ -1540,6 +1417,13 @@ public class MqttReporter {
             + "\"ic\":\"mdi:thermostat\"," + dev
             + "}";
         pub("homeassistant/sensor/" + DEV_ID + "/comfort/config", cmf, true);
+    }
+
+    static String[] retiredUpdateDiscoveryTopics(String deviceId) {
+        return new String[]{
+            "homeassistant/button/" + deviceId + "/update/config",
+            "homeassistant/sensor/" + deviceId + "/update_state/config"
+        };
     }
 
     private void sendChargeNumberDiscovery() {

@@ -106,9 +106,6 @@
     <string name="cfg_version_label">Version: %1$s (build %2$d)</string>
     <string name="cfg_ip_label">Wi-Fi IP address: %1$s</string>
     <string name="cfg_sha_label">APK SHA-256</string>
-    <string name="cfg_update_header">Software update</string>
-    <string name="cfg_update_url_label">Update URL (HTTPS)</string>
-    <string name="cfg_btn_check_update">Check &amp; Install Update</string>
     <string name="cfg_maintenance_header">Maintenance</string>
     <string name="cfg_mqtt_header">Sending to Home Assistant</string>
     <string name="cfg_mqtt_enable_label">Enable MQTT telemetry</string>
@@ -208,7 +205,6 @@
     <string name="cfg_btn_off">Turn off</string>
     <string name="cfg_btn_test">Test</string>
     <string name="cfg_btn_discovery">MQTT Discovery</string>
-    <string name="cfg_btn_update">Update</string>
     <string name="cfg_btn_save">Save</string>
     <string name="cfg_testing">Testing…</string>
     <string name="cfg_discovery_sending">Sending MQTT discovery…</string>
@@ -441,21 +437,6 @@
     <string name="charge_balance_regen">Regen</string>
 
     <!-- software update dialog & prompt -->
-    <string name="update_dialog_title">Software Update Available</string>
-    <string name="update_dialog_title_target">%1$s Update Available</string>
-    <string name="update_dialog_version_comp">Version: %1$s   →   %2$s</string>
-    <string name="update_dialog_current_ver">Current version: %1$s</string>
-    <string name="update_dialog_new_ver">New version: %1$s</string>
-    <string name="update_dialog_changelog_header">What\'s new:</string>
-    <string name="update_dialog_accept">Accept &amp; Update</string>
-    <string name="update_dialog_decline">Later</string>
-    <string name="update_dialog_skip">Skip this version</string>
-    <string name="update_checking">Checking for updates…</string>
-    <string name="update_up_to_date">Drive Assist is up to date (%1$s)</string>
-    <string name="update_check_failed">Could not check for updates: %1$s</string>
-    <string name="update_downloading">Downloading update (%1$s)…</string>
-    <string name="update_installing">Installing update…</string>
-    <string name="update_not_parked">Updates can only be reviewed and installed while parked.</string>
 
     <!-- daily stats day navigator -->
     <string name="daily_stats_prev_day">Previous</string>
@@ -486,17 +467,6 @@
     <string name="probe_telemetry_results_header">TELEMETRY (responsive properties):\n\n</string>
     <string name="probe_charging_results_header">CHARGING (read only):\n\n</string>
     <string name="probe_location_results_header">LOCATION:\n\n</string>
-    <string name="update_handed_to_helper">Handed to the system helper</string>
-    <string name="update_downloading_short">Downloading</string>
-    <string name="update_installing_size">Installing (%1$d KB)</string>
-    <string name="update_error_https">Error: URL must use HTTPS</string>
-    <string name="update_already_applied">Already applied</string>
-    <string name="update_helper_unavailable">System helper unavailable — trying root</string>
-    <string name="update_error_http">Error: HTTP %1$d</string>
-    <string name="update_error_not_apk">Error: file is not an APK</string>
-    <string name="update_already_installed">Already installed (%1$s)</string>
-    <string name="update_ok">OK — updated</string>
-    <string name="update_error_detail">Error: %1$s</string>
 
     <!-- Daily statistics is constructed in Java, so every visible heading and
          sentence must still come through the same English resource bundle. -->
